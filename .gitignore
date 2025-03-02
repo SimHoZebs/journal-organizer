@@ -46,3 +46,10 @@ data/db/
 .env.development.local
 .env.test.local
 .env.production.local
+.ignore
+
+# npm workspace specific
+/node_modules
+package-lock.json
+!frontend/package-lock.json
+!backend/package-lock.json

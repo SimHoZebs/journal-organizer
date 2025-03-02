@@ -1,0 +1,27 @@
+{
+  "name": "journal-organizer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Journal organizer application",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:mobile": "cd mobile && flutter run",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "build": "npm run build --workspace=frontend",
+    "build:mobile": "cd mobile && flutter build apk",
+    "mongodb": "docker compose up -d mongodb",
+    "mongodb:stop": "docker compose down",
+    "setup:env": "cp .env.example .env || echo '.env already exists'",
+    "setup": "npm run setup:env && npm install",
+    "mobile:clean": "cd mobile && flutter clean",
+    "mobile:test": "cd mobile && flutter test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

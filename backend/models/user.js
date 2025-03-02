@@ -1,8 +1,16 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+// increment plugin
+const autoIncrement = require('mongoose-sequence')(mongoose);
+autoIncrement.initialize(mongoose.connection);
+
 // Define the User schema
 const userSchema = new mongoose.Schema({
+    userId: { 
+        type: Number,
+        unique: true
+    },
     firstName: {
         type: String,
         required: true,
@@ -19,6 +27,10 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true
+    },
+    login: {
+        type: String,
+        required: true,
     },
     password: {
         type: String,
@@ -41,7 +53,13 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     }
 });
-
+// creates unique user id
+userSchema.plugin(autoIncrement.plugin, {
+    model: User,
+    field: userId,
+    startAt: 1,
+    incrementBy: 1
+});
 // Pre-save middleware to hash the password before saving
 userSchema.pre('save', async function (next) {
     // Only hash the password if it has been modified (or is new)

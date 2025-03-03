@@ -15,12 +15,16 @@
     "mongodb": "docker compose up -d mongodb",
     "mongodb:stop": "docker compose down",
     "setup:env": "test -f .env || cp .env.example .env",
-    "setup": "npm run setup:env && npm install"
+    "setup": "npm run setup:env && npm install",
+    "format": "biome format . --write",
+    "lint": "biome lint .",
+    "check": "biome check ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "concurrently": "^9.1.2"
   }
 }

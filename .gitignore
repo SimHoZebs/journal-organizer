@@ -50,6 +50,3 @@ data/db/
 
 # npm workspace specific
 /node_modules
-package-lock.json
-!frontend/package-lock.json
-!backend/package-lock.json

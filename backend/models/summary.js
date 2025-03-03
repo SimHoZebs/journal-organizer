@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
 // increment plugin
-const autoIncrement = require('mongoose-auto-increment');
-autoIncrement.initialize(mongoose.connection);
+const AutoIncrement = require('mongoose-auto-increment');
 
 // Define the summary schema
 const summarySchema = new mongoose.Schema({
@@ -30,11 +29,9 @@ const summarySchema = new mongoose.Schema({
 });
 
 // creates unique summary id
-summarySchema.plugin(autoIncrement.plugin, {
-    model: 'Summary',
-    field: 'summaryId',
-    startAt: 1,
-    incrementBy: 1
+summarySchema.plugin(AutoIncrement, {
+    inc_field: "summaryId",
+    start_seq: 1
 });
 
 module.exports = mongoose.model('Summary', summarySchema);

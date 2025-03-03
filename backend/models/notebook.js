@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
 // increment plugin
-const autoIncrement = require('mongoose-sequence')(mongoose);
-autoIncrement.initialize(mongoose.connection);
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 // Define the Notebook schema
 const notebookSchema = new mongoose.Schema({
@@ -31,11 +30,9 @@ const notebookSchema = new mongoose.Schema({
     timestamps: { createdAt: 'timeCreated', updatedAt: 'timeUpdated' } 
 });
 // creates unique notebook id
-notebookSchema.plugin(autoIncrement.plugin, {
-    model: 'Notebook',
-    field: 'notebookId',
-    startAt: 1,
-    incrementBy: 1
+notebookSchema.plugin(AutoIncrement, {
+    inc_field: "notebookId",
+    start_seq: 1
 });
 
 module.exports = mongoose.model('Notebook', notebookSchema);

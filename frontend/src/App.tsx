@@ -1,21 +1,16 @@
-import { useEffect, useState } from "react";
-import viteLogo from "/vite.svg";
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
 import "./App.css";
+import Login from "./Login";
+import SignUp from "./SignUp";
 
 function App() {
   const [count, setCount] = useState(0);
   const [apiMessage, setApiMessage] = useState("");
 
-  useEffect(() => {
-    // Fetch the API endpoint
-    fetch("/api/test")
-      .then((res) => res.json())
-      .then((data) => setApiMessage(data.message))
-      .catch((err) => console.error("Error fetching API:", err));
-  }, []);
-
-  return (
+  const MainContent = () => (
     <>
       <div>
         <a href="https://vite.dev" target="_blank" rel="noreferrer">
@@ -40,6 +35,16 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
     </>
+  );
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<MainContent />} />
+        <Route path="/register" element={<SignUp />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -10,8 +10,8 @@ const Login = () => {
       <div className="w-full fixed top-0 left-0">
         <Navbar />
       </div>
-      <div className="bg-neutral-300 w-96 p-6 rounded-xl shadow-md flex flex-col items-center">
-        <h2 className="text-2xl font-bold text-neutral-900 mb-4">Sign In</h2>
+      <div className="bg-neutral-700 w-96 p-6 rounded-xl shadow-md flex flex-col items-center">
+        <h2 className="text-2xl font-bold text-neutral-200 mb-4">Sign In</h2>
 
         <input
           type="text"
@@ -31,17 +31,17 @@ const Login = () => {
           />
         </div>
 
-        <button className="w-full mt-4 !bg-neutral-400 text-neutral-50 py-2 rounded-md hover:!bg-neutral-600">
+        <button className="w-full mt-4 !bg-neutral-800 text-neutral-50 py-2 rounded-md hover:!bg-neutral-500">
           Login
         </button>
       </div>
 
-      <div className="bg-neutral-300 w-96 mt-4 p-3 rounded-xl shadow-md flex justify-center">
-        <p className="text-sm text-neutral-800">
+      <div className="bg-neutral-700 w-96 mt-4 p-3 rounded-xl shadow-md flex justify-center">
+        <p className="text-sm text-neutral-100">
           Don't have an account?{" "}
           <a
             href="/register"
-            className="text-neutral-700 underline hover:text-neutral-900"
+            className="!text-white underline hover:text-neutral-900"
           >
             Sign Up
           </a>

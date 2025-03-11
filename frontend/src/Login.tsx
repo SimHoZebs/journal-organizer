@@ -6,10 +6,10 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false); 
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleLogin = () => {
-    setIsSubmitted(true); 
+    setIsSubmitted(true);
     if (!username || !password) {
       setErrorMessage("Please fill in all fields");
       return;
@@ -23,8 +23,10 @@ const Login = () => {
       </div>
       <div className="bg-neutral-700 w-96 p-6 rounded-xl shadow-md flex flex-col items-center">
         <h2 className="text-2xl font-bold text-white mb-4">Sign In</h2>
-        
-        <p className={`text-sm text-red-600 mb-4 ${errorMessage ? "block" : "hidden"}`}>
+
+        <p
+          className={`text-sm text-red-600 mb-4 ${errorMessage ? "block" : "hidden"}`}
+        >
           {errorMessage}
         </p>
 
@@ -61,7 +63,10 @@ const Login = () => {
       <div className="bg-neutral-700 w-96 mt-4 p-3 rounded-xl shadow-md flex justify-center">
         <p className="text-sm text-white">
           Don't have an account?{" "}
-          <a href="/register" className="!text-white !underline hover:text-neutral-900">
+          <a
+            href="/register"
+            className="!text-white !underline hover:text-neutral-900"
+          >
             Sign Up
           </a>
         </p>

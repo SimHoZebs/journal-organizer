@@ -67,7 +67,7 @@ const SignUp = () => {
           Already have an account?{" "}
           <a
             href="/login"
-            className="!text-white underline hover:text-neutral-900"
+            className="!text-white !underline hover:text-neutral-900"
           >
             Sign In
           </a>

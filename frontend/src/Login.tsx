@@ -5,7 +5,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(""); // State for error message
+  const [errorMessage, setErrorMessage] = useState(""); 
 
   const handleLogin = () => {
     
@@ -23,7 +23,7 @@ const Login = () => {
       <div className="bg-neutral-700 w-96 p-6 rounded-xl shadow-md flex flex-col items-center">
         <h2 className="text-2xl font-bold text-white mb-4">Sign In</h2>
         
-        {/* Error message, hidden unless errorMessage is set */}
+        
         <p className={`text-sm text-red-600 mb-4 ${errorMessage ? "block" : "hidden"}`}>
           {errorMessage}
         </p>
@@ -47,7 +47,7 @@ const Login = () => {
         </div>
 
         <button
-          onClick={handleLogin} // Trigger login on click
+          onClick={handleLogin} 
           className="w-full mt-4 !bg-neutral-800 text-neutral-50 py-2 rounded-md hover:!bg-neutral-600"
         >
           Login

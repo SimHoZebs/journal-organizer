@@ -82,7 +82,7 @@ const SignUp = () => {
 
         <button
           onClick={handleRegister}
-          className="w-full mt-4 !bg-neutral-800 text-neutral-50 py-2 rounded-md hover:!bg-neutral-500"
+          className="w-full mt-4 !bg-neutral-800 !border-neutral-600 text-neutral-50 py-2 rounded-md hover:!bg-neutral-400"
         >
           Register
         </button>

@@ -21,7 +21,7 @@ const SignUp = () => {
         <input
           type="text"
           placeholder="Email"
-          className="w-full px-3 py-2 border border-neutral-500 rounded-md mb-3 bg-neutral-100 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-600"
+          className="w-full px-3 py-2 border border-neutral-500 rounded-md mb-3 bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -29,7 +29,7 @@ const SignUp = () => {
         <input
           type="text"
           placeholder="User Name"
-          className="w-full px-3 py-2 border border-neutral-500 rounded-md mb-3 bg-neutral-100 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-600"
+          className="w-full px-3 py-2 border border-neutral-500 rounded-md mb-3 bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
@@ -38,7 +38,7 @@ const SignUp = () => {
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
-            className="w-full px-3 py-2 border border-neutral-500 rounded-md bg-neutral-100 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-600"
+            className="w-full px-3 py-2 border border-neutral-500 rounded-md bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -48,7 +48,7 @@ const SignUp = () => {
           <input
             type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm Password"
-            className="w-full px-3 py-2 border border-neutral-500 rounded-md bg-neutral-100 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-600"
+            className="w-full px-3 py-2 border border-neutral-500 rounded-md bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />

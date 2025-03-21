@@ -5,6 +5,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import Login from "./Login";
 import SignUp from "./SignUp";
+import EmailVerify from "./EmailVerify";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -43,6 +44,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainContent />} />
         <Route path="/register" element={<SignUp />} />
+        <Route path="/verify" element={<EmailVerify />} />
       </Routes>
     </BrowserRouter>
   );

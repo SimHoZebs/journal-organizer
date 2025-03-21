@@ -7,8 +7,8 @@ const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  // const [showPassword, setShowPassword] = useState(false);
-  //const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -20,20 +20,17 @@ const SignUp = () => {
       return;
     }
     try {
-      const response = await fetch(
-        "http://134.209.175.201:3000/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            email,
-            password,
-          }),
+      const response = await fetch("http://localhost:3000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+        }),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -45,11 +42,12 @@ const SignUp = () => {
       const data = await response.json();
       console.log(data.message);
       console.log(data.verificationToken);
-      navigate("/login");
+      localStorage.setItem("verificationToken", data.verificationToken);
+      navigate("/verify");
     } catch (error) {
       console.error("Registration error:", (error as Error).message);
     }
-  }; // Removed extra brace here
+  };
 
   return (
     <div className="fixed inset-0 flex flex-col justify-center items-center bg-neutral-900">
@@ -88,7 +86,7 @@ const SignUp = () => {
 
         <div className="relative w-full">
           <input
-            // type={showPassword ? "text" : "password"}
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
             className={`w-full px-3 py-2 border rounded-md bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
               isSubmitted && !password ? "border-red-600" : "border-neutral-500"
@@ -100,7 +98,7 @@ const SignUp = () => {
 
         <div className="relative w-full mt-3">
           <input
-            //type={showPassword ? "text" : "password"}
+            type={showPassword ? "text" : "password"}
             placeholder="Confirm Password"
             className={`w-full px-3 py-2 border rounded-md bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
               isSubmitted && !confirmPassword

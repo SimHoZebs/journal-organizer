@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isSelectable = false;
   bool _useMarkdownBody = false;
   bool _isEditMode = false;
-  TextEditingController _editingController = TextEditingController();
+  final TextEditingController _editingController = TextEditingController();
 
   // Custom extension set with emoji support
   final _markdownExtensionSet = md.ExtensionSet(
@@ -166,9 +166,16 @@ void main() {
                         selectable: _isSelectable,
                         extensionSet: _markdownExtensionSet,
                         onTapText: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Text tapped')),
-                          );
+                          try {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Text tapped')),
+                            );
+                          } catch (e) {
+                            // Handle the error, e.g., show an error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${e.toString()}')),
+                            );
+                          }
                         },
                       ),
             ),

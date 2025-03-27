@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import EyeOpenIcon from "../assets/icon/eye-open.svg";
-import EyeClosedIcon from "../assets/icon/eye-closed.svg";
+import EyeOpenIcon from "../assets/icons/eye-open.svg";
+import EyeClosedIcon from "../assets/icons/eye-closed.svg";
 
 const Login = () => {
   const [username, setUsername] = useState("");

@@ -5,11 +5,13 @@ import notesPage from "../assets/icons/notes-page-icon.svg";
 import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 import contactIcon from "../assets/icons/contact-icon.svg";
 import logoutIcon from "../assets/icons/logout-icon.svg";
+import addNoteIcon from "../assets/icons/add-new-note-icon.svg";
 
 type Props = {
-  page: string;
+  //defines the expected props
+  page: string; //Identifies the current page ("Notes" or "Summary")
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
-  getSelectedItem: (id: number) => void;
+  getSelectedItem: (id: number) => void; // A function to handle selecting an item from the list.
 };
 
 const SideNav: React.FC<Props> = ({
@@ -30,7 +32,7 @@ const SideNav: React.FC<Props> = ({
   useEffect(() => {
     setDisplayList([
       {
-        name: "John Doe",
+        name: "Cookies",
         id: 1,
         summary: "This is a summary of person 1",
       },
@@ -142,6 +144,18 @@ const SideNav: React.FC<Props> = ({
 
           {/* Page Navigation */}
           <div className="flex items-center justify-between gap-3">
+            {page === "Notes" && (
+              <button
+                className={`p-1.5 rounded-lg cursor-pointer ${"hover:bg-gray-200"}`}
+                onClick={() => getSelectedItem(-1)}
+              >
+                <img
+                  className="w-[25px] h-[25px]"
+                  src={addNoteIcon}
+                  alt="Add New Note Icon"
+                />
+              </button>
+            )}
             <Link to="/notes">
               <button
                 className={`p-1.5 rounded-lg cursor-pointer ${

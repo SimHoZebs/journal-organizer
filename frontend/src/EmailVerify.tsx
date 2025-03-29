@@ -1,26 +1,35 @@
 import { useNavigate } from "react-router";
 import Navbar from "./components/Navbar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const EmailVerify = () => {
   const navigate = useNavigate();
+  const [message, setMessage] = useState("Verifying your email...");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleVerify = async () => {
-    const token = localStorage.getItem("verificationToken");
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
 
     if (!token) {
-      setErrorMessage("No verification token found");
+      setErrorMessage("No verification token found in the URL");
       return;
     }
 
+    handleVerify(token);
+  }, []);
+
+  const handleVerify = async (token: string) => {
     try {
+      console.log("API URL for verify:", import.meta.env.VITE_API_URL);
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/auth/verify-email?token=${token}`,
         {
           method: "GET",
           headers: {
-            accept: "application/json",
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
         },
       );
@@ -28,16 +37,21 @@ const EmailVerify = () => {
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Verification failed: ${response.status} - ${errorText}`,
+          `Verification failed: ${response.status} - ${errorText || "An error occurred during verification."}`,
         );
       }
 
-      console.log("Email successfully verified");
-      localStorage.removeItem("verificationToken");
-      navigate("/login");
+      const data = await response.json();
+      console.log("Email successfully verified:", data.message);
+      setMessage("Email verified successfully! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error("Email verification failed:", error);
-      setErrorMessage("Email verification failed");
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occurred");
+      }
     }
   };
 
@@ -48,19 +62,12 @@ const EmailVerify = () => {
       </div>
       <div className="bg-neutral-700 w-96 p-6 rounded-xl shadow-md flex flex-col items-center">
         <h2 className="text-2xl font-bold text-white mb-4">
-          Verify your email
+          Verify Your Email
         </h2>
-
+        <p className="text-neutral-100 text-center mb-4">{message}</p>
         {errorMessage && (
           <p className="text-sm text-red-600 mb-4">{errorMessage}</p>
         )}
-
-        <button
-          onClick={handleVerify}
-          className="w-full mt-4 !bg-neutral-800 !border-neutral-600 text-neutral-50 py-2 rounded-md hover:!bg-neutral-600"
-        >
-          Verify
-        </button>
       </div>
     </div>
   );

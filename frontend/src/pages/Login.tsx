@@ -40,9 +40,10 @@ const Login = () => {
 
       const data = await response.json();
       console.log(data.message);
+      localStorage.setItem("userId", data.userId);
 
       //localStorage.setItem('token', data.token);
-      navigate("/");
+      navigate("/notes");
     } catch (error) {
       console.error("Login error:", (error as Error).message);
       const errorMsg = (error as Error).message;
@@ -70,7 +71,9 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-white mb-4">Sign In</h2>
 
         <p
-          className={`text-sm text-red-600 mb-4 ${errorMessage ? "block" : "hidden"}`}
+          className={`text-sm text-red-600 mb-4 ${
+            errorMessage ? "block" : "hidden"
+          }`}
         >
           {errorMessage}
         </p>

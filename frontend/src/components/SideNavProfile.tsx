@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import notesPage from "../assets/icons/notes-page-icon.svg";
 import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
@@ -7,89 +7,95 @@ import contactIcon from "../assets/icons/contact-icon.svg";
 import logoutIcon from "../assets/icons/logout-icon.svg";
 
 type Props = {
-  page: string;
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
-  getSelectedItem: (id: number) => void;
+  userName: string;
+  userId: string; // User ID to fetch profiles
+  setSelectedRelationship: React.Dispatch<
+    React.SetStateAction<{
+      [key: string]: string | number | boolean;
+      profileTitle: string;
+      _id: number;
+    } | null>
+  >; // Function to set the selected relationship
 };
 
 const SideNav: React.FC<Props> = ({
-  page, // Page Name (Notes or Relationships)
   closeNav, // Close the SideNav
-  getSelectedItem, // Get the selectedItem to display
+  userName,
+  userId,
+  setSelectedRelationship,
 }) => {
   const [search, setSearch] = useState<string>(""); // Search Input
   const [displayList, setDisplayList] = useState<
-    { name: string; id: number; [key: string]: string | number | boolean }[]
+    {
+      profileTitle: string;
+      _id: number;
+      [key: string]: string | number | boolean;
+    }[]
   >([]); // List of Notes/Relationships to display in SideNav
   const [selectedId, setSelectedId] = useState<number | null>(null); // Store ID of Notes/Relationships
   const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false); // User Dropdown State
   const userDropdown = useRef<HTMLDivElement>(null); // User Dropdown Ref
   const navModal = useRef<HTMLDivElement>(null); // Nav Black Part
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
+    navigate("/login");
+  };
+
+  const searchProfiles = async (query: string) => {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/profile/search?userId=${userId}&query=${encodeURIComponent(query)}`,
+        {
+          method: "GET",
+        },
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        throw new Error(
+          errorMessage.error || "Unexpected error while searching for profiles",
+        );
+      }
+
+      const responseData = await response.json();
+      console.log(responseData.message);
+      setDisplayList(responseData.profiles);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getSelectedRelationship = async (profileId: number) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/profile/${userId}/${profileId}`,
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        throw new Error(
+          errorMessage.error || "Unexpected error while retrieving profile",
+        );
+      }
+
+      const responseData = await response.json();
+      console.log(responseData.message);
+
+      setSelectedRelationship(responseData.profile);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // Use Effect to put mock data into displayList
   useEffect(() => {
-    setDisplayList([
-      {
-        name: "John Doe",
-        id: 1,
-        summary: "This is a summary of person 1",
-      },
-      {
-        name: "Richard Leindecker",
-        id: 2,
-        summary: "This is a summary of person 2",
-      },
-      {
-        name: "Person 3 has a long name. Like extremely long name",
-        id: 3,
-        summary: "This is a summary of person 3",
-      },
-      {
-        name: "TheChosenOne",
-        id: 4,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 5,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 6,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 7,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 8,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 9,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 10,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 11,
-        summary: "This is a summary of person 4",
-      },
-      {
-        name: "TheChosenOne",
-        id: 12,
-        summary: "This is a summary of person 4",
-      },
-    ]);
+    searchProfiles("");
   }, []);
 
   // Use Effect to close User Dropdown if clicked outside of the dropdown
@@ -143,11 +149,7 @@ const SideNav: React.FC<Props> = ({
           {/* Page Navigation */}
           <div className="flex items-center justify-between gap-3">
             <Link to="/notes">
-              <button
-                className={`p-1.5 rounded-lg cursor-pointer ${
-                  page === "Notes" ? "bg-gray-300" : "hover:bg-gray-200"
-                }`}
-              >
+              <button className="p-1.5 rounded-lg cursor-pointer hover:bg-gray-200">
                 <img
                   className="w-[25px] h-[25px]"
                   src={notesPage}
@@ -156,11 +158,7 @@ const SideNav: React.FC<Props> = ({
               </button>
             </Link>
             <Link to="/relationships">
-              <button
-                className={`p-1.5 rounded-lg cursor-pointer ${
-                  page === "Relationships" ? "bg-gray-300" : "hover:bg-gray-200"
-                }`}
-              >
+              <button className="p-1.5 rounded-lg cursor-pointer bg-gray-300">
                 <img
                   className="w-[25px] h-[25px]"
                   src={relationshipIcon}
@@ -179,8 +177,9 @@ const SideNav: React.FC<Props> = ({
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
+              searchProfiles(event.target.value);
             }}
-            placeholder={"Search " + page}
+            placeholder={"Search Profile"}
           />
 
           {/* Display List */}
@@ -189,17 +188,17 @@ const SideNav: React.FC<Props> = ({
               <button
                 key={index}
                 className={`text-left px-4 py-2 rounded-xl truncate shrink-0 ${
-                  selectedId === item.id ? "bg-gray-300" : "hover:bg-gray-200"
+                  selectedId === item._id ? "bg-gray-300" : "hover:bg-gray-200"
                 }`}
                 onClick={() => {
-                  setSelectedId(item.id);
-                  getSelectedItem(item.id);
+                  setSelectedId(item._id);
+                  getSelectedRelationship(item._id);
                   if (window.innerWidth < 640) {
                     closeNav(false);
                   }
                 }}
               >
-                {item.name}
+                {item.profileTitle}
               </button>
             ))}
           </div>
@@ -213,19 +212,12 @@ const SideNav: React.FC<Props> = ({
               ref={userDropdown}
               className="z-10 w-[calc(100%-16px)] absolute left-1/2 -translate-x-1/2 bottom-full mb-2 rounded-xl border-[0.5px] flex flex-col bg-gray-200"
             >
-              <Link to="/user-profile">
-                <button className="w-full flex border-b items-center gap-2 py-2.5 px-5 hover:bg-gray-300 rounded-tl-xl rounded-tr-xl cursor-pointer">
-                  <img
-                    className="w-[20px] h-[20px]"
-                    src={contactIcon}
-                    alt="User Profile Icon"
-                  />
-                  <span className="whitespace-nowrap">User Profileeee</span>
-                </button>
-              </Link>
-              <button className="w-full flex items-center gap-2 py-2.5 px-5 hover:bg-gray-300 rounded-bl-xl rounded-br-xl cursor-pointer">
+              <button
+                className="w-full flex items-center gap-2 py-2.5 px-5 hover:bg-gray-300 rounded-bl-xl rounded-br-xl cursor-pointer"
+                onClick={handleLogout}
+              >
                 <img
-                  className="w-[20px] h-[20x]"
+                  className="w-[20px] h-[20px]"
                   src={logoutIcon}
                   alt="Logout Icon"
                 />
@@ -246,9 +238,7 @@ const SideNav: React.FC<Props> = ({
               src={contactIcon}
               alt="User Contact Icon"
             />
-            <span className="text-lg truncate">
-              User Name That is extremely long yep. It is long.
-            </span>
+            <span className="text-lg truncate">{userName}</span>
           </button>
         </div>
       </div>

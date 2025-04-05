@@ -21,6 +21,7 @@ exports.register = async (req, res) => {
       username,
       email,
       password,
+      //SET TO FALSE LATER
       isVerified: false, // Initially not verified
       journalIDs: [], // Empty array for journal IDs
       summaryIDs: [], // Empty array for summary IDs

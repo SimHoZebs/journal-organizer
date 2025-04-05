@@ -71,7 +71,7 @@ exports.searchProfiles = async (req, res) => {
   try {
     const { userId, query } = req.query;
 
-    if (!userId || !query) {
+    if (!userId || query === null || query === undefined) {
       return res
         .status(400)
         .json({ error: "Missing userId or query parameter" });

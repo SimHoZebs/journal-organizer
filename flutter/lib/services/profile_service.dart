@@ -77,9 +77,10 @@ class ProfileService {
   static Future<Map<String, dynamic>> searchProfiles(
     String query,
     String token,
+    String userId,
   ) async {
     final url = Uri.parse(
-      '${ApiBase.baseUrl}/profile/search?q=${Uri.encodeComponent(query)}',
+      '${ApiBase.baseUrl}/profile/search?userId=$userId&query=${Uri.encodeComponent(query)}',
     );
     final response = await http.get(url, headers: ApiBase.getHeaders(token));
 

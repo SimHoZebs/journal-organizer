@@ -40,6 +40,8 @@ const Login = () => {
 
       const data = await response.json();
       console.log(data.message);
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("username", username);
 
       //localStorage.setItem('token', data.token);
       navigate("/");
@@ -70,7 +72,9 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-white mb-4">Sign In</h2>
 
         <p
-          className={`text-sm text-red-600 mb-4 ${errorMessage ? "block" : "hidden"}`}
+          className={`text-sm text-red-600 mb-4 ${
+            errorMessage ? "block" : "hidden"
+          }`}
         >
           {errorMessage}
         </p>

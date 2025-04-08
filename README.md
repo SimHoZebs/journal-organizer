@@ -21,8 +21,8 @@ This project is organized as an npm workspace monorepo with the following struct
 
 2. Clone the Repository
 ```bash
-git clone git@github.com:SimHoZebs/journal-organizer.git
-cd journal-organizer
+git clone git@github.com:SimHoZebs/note-organizer.git
+cd note-organizer
 ```
 
 3. Setup Environment and Install Dependencies

@@ -5,8 +5,8 @@ async function testCreateProfile() {
   try {
     const url = "http://localhost:3000/profile/create-profile";
 
-    // Example notebooks referencing "Mary"
-    const notebookContents = [
+    // Example notes referencing "Mary"
+    const noteContents = [
       "Mary is a 32-year-old software engineer working at TechCorp.",
       "She completed her M.S. in Computer Science last year.",
       "Mary is based in Seattle, enjoys painting, and often collaborates with the AI research team.",
@@ -17,7 +17,7 @@ async function testCreateProfile() {
     const response = await axios.post(url, {
       tag: "Mary",
       tagType: "person",
-      notebookContents,
+      noteContents,
     });
 
     console.log("Profile creation response:", response.data);

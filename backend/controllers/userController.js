@@ -1,31 +1,123 @@
-import User from "../models/user.js";
+import bcrypt from "bcrypt";
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { drizzleDb } from "../database/db.js";
+import {
+  notes,
+  profiles,
+  userNotes,
+  userProfiles,
+  users,
+} from "../database/schema.js";
+
+// Database operations (moved from models/user.js)
+
+// Find a user by ID
+export async function findById(id) {
+  const result = await drizzleDb
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+  return result[0] || null;
+}
+
+// Find a user by email
+export async function findByEmail(email) {
+  const result = await drizzleDb
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return result[0] || null;
+}
+
+// Find a user by username
+export async function findByUsername(username) {
+  const result = await drizzleDb
+    .select()
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+  return result[0] || null;
+}
+
+// Create a new user
+export async function create({ username, email, password }) {
+  const id = nanoid();
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  await drizzleDb.insert(users).values({
+    id,
+    username,
+    email,
+    password: hashedPassword,
+    isVerified: false,
+    createdAt: Date.now(),
+  });
+
+  return findById(id);
+}
+
+// Update a user
+export async function updateById(id, updateData) {
+  await drizzleDb.update(users).set(updateData).where(eq(users.id, id));
+  return findById(id);
+}
+
+// Compare password
+export async function comparePassword(plainPassword, hashedPassword) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
+}
+
+// Get user's notes
+export async function getNotes(userId) {
+  const retrieved = await drizzleDb
+    .select()
+    .from(userNotes)
+    .leftJoin(notes, eq(userNotes.noteId, notes.id))
+    .where(eq(userNotes.userId, userId));
+
+  return retrieved.map((j) => j.notes);
+}
+
+// Get user's profiles
+export async function getProfiles(userId) {
+  const updatedProfiles = await drizzleDb
+    .select()
+    .from(userProfiles)
+    .leftJoin(profiles, eq(userProfiles.profileId, profiles.id))
+    .where(eq(userProfiles.userId, userId));
+
+  return updatedProfiles.map((s) => s.profiles);
+}
+
+// HTTP Request handlers
 
 // Create a new user
 export const createUser = async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName } = req.body;
+    const { username, email, password } = req.body;
 
     // Check if a user with the same email or username already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
+    const existingUserByEmail = await findByEmail(email);
+    const existingUserByUsername = await findByUsername(username);
+
+    if (existingUserByEmail || existingUserByUsername) {
       return res.status(409).json({ error: "User already exists" });
     }
 
-    const newUser = new User({
-      firstName,
-      lastName,
+    const newUser = await create({
       username,
       email,
       password,
       isVerified: false, // Initially not verified
-      journalIDs: [], // Initially empty
-      summaryIDs: [], // Initially empty
     });
 
-    const savedUser = await newUser.save();
     // Exclude password from response
-    const userResponse = savedUser.toObject();
-    userResponse.password = undefined;
+    const { password: _, ...userResponse } = newUser;
+
     res
       .status(201)
       .json({ message: "User created successfully", user: userResponse });
@@ -37,8 +129,17 @@ export const createUser = async (req, res) => {
 // Get all users
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
-    res.json(users);
+    const userList = await drizzleDb
+      .select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        isVerified: users.isVerified,
+        createdAt: users.createdAt,
+      })
+      .from(users);
+
+    res.json(userList);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -47,9 +148,13 @@ export const getAllUsers = async (req, res) => {
 // Get a user by ID
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+
+    // Exclude password from response
+    const { password, ...userWithoutPassword } = user;
+
+    res.json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -58,33 +163,33 @@ export const getUserById = async (req, res) => {
 // Update a user by ID
 export const updateUser = async (req, res) => {
   try {
+    const { id } = req.params;
     const updateData = req.body;
+
     // Find the user
-    const user = await User.findById(req.params.id);
+    const user = await findById(id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Update fields individually (this ensures the pre-save hook runs if password is changed)
-    user.firstName = updateData.firstName || user.firstName;
-    user.lastName = updateData.lastName || user.lastName;
-    user.username = updateData.username || user.username;
-    user.email = updateData.email || user.email;
+    // Handle password updates separately
+    const updatedFields = { ...updateData };
+
     if (updateData.password) {
-      user.password = updateData.password; // Will be hashed by the pre-save hook
-    }
-    if (updateData.isVerified !== undefined) {
-      user.isVerified = updateData.isVerified;
-    }
-    if (updateData.journalIDs) {
-      user.journalIDs = updateData.journalIDs;
-    }
-    if (updateData.summaryIDs) {
-      user.summaryIDs = updateData.summaryIDs;
+      // Hash the password
+      const salt = await bcrypt.genSalt(10);
+      updatedFields.password = await bcrypt.hash(updateData.password, salt);
     }
 
-    const savedUser = await user.save();
-    const userResponse = savedUser.toObject();
-    userResponse.password = undefined;
-    res.json({ message: "User updated successfully", user: userResponse });
+    // Update user
+    const updatedUser = await updateById(id, updatedFields);
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+
+    // Exclude password from response
+    const { password, ...userWithoutPassword } = updatedUser;
+
+    res.json({
+      message: "User updated successfully",
+      user: userWithoutPassword,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -93,8 +198,7 @@ export const updateUser = async (req, res) => {
 // Delete a user by ID
 export const deleteUser = async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser) return res.status(404).json({ error: "User not found" });
+    await drizzleDb.delete(users).where(eq(users.id, req.params.id));
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -105,13 +209,13 @@ export const deleteUser = async (req, res) => {
 export const getUserIdByUsername = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username });
+    const user = await findByUsername(username);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json({ userId: user._id });
+    res.json({ userId: user.id });
   } catch (error) {
     console.error("Error fetching user ID:", error);
     res.status(500).json({ error: error.message });

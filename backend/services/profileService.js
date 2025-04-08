@@ -1,5 +1,7 @@
-import Notebook from "../models/notebook.js";
-import Profile from "../models/summary.js";
+import { and, eq, inArray, like } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { drizzleDb } from "../database/db.js";
+import { noteProfiles, notes, profiles } from "../database/schema.js";
 import * as openaiService from "./openaiService.js";
 
 function formatProfileContent(data) {
@@ -49,83 +51,184 @@ Memorable Quotes: ${formatQuotes(data.memorableQuotes)}
 Additional Notes: ${formatField(data.additionalNotes)}`;
 }
 
-export const updateProfilesForNotebook = async (notebook, operation) => {
+export const updateProfilesForNote = async (note, operation) => {
   if (operation === "create" || operation === "update") {
-    const namesArray = await openaiService.extractTags(notebook.content);
-    notebook.tags = Array.isArray(namesArray) ? namesArray : [];
-    await notebook.save();
+    const namesArray = await openaiService.extractTags(note.content);
+
+    // Update note tags directly
+    const tagsJson = JSON.stringify(
+      Array.isArray(namesArray) ? namesArray : [],
+    );
+    await drizzleDb
+      .update(notes)
+      .set({
+        tags: tagsJson,
+        timeUpdated: Date.now(),
+      })
+      .where(eq(notes.id, note.id));
+
+    // Get the updated note with parsed tags
+    const result = await drizzleDb
+      .select()
+      .from(notes)
+      .where(eq(notes.id, note.id))
+      .limit(1);
+    const updatedNote = result[0];
+    updatedNote.tags = JSON.parse(updatedNote.tags);
 
     const updatedProfiles = new Set();
 
-    for (const name of notebook.tags) {
+    for (const name of updatedNote.tags) {
       const normalized = name.trim().toLowerCase();
       if (updatedProfiles.has(normalized)) {
         continue;
       }
       updatedProfiles.add(normalized);
 
-      let profile = await Profile.findOne({
-        profileTitle: { $regex: new RegExp(`^${normalized}$`, "i") },
-        userId: notebook.userId,
-      });
+      // Find profile by name (case-insensitive)
+      const profileResult = await drizzleDb
+        .select()
+        .from(profiles)
+        .where(
+          and(
+            eq(profiles.userId, note.userId),
+            like(profiles.profileTitle, normalized),
+          ),
+        )
+        .limit(1);
+
+      const profile = profileResult[0];
+      let profileId;
 
       if (profile) {
-        if (
-          !profile.notebookIDs.some(
-            (id) => id.toString() === notebook._id.toString(),
+        profileId = profile.id;
+
+        // Check if note is already associated with profile
+        const existingRelation = await drizzleDb
+          .select()
+          .from(noteProfiles)
+          .where(
+            and(
+              eq(noteProfiles.profileId, profileId),
+              eq(noteProfiles.noteId, note.id),
+            ),
           )
-        ) {
-          profile.notebookIDs.push(notebook._id);
+          .limit(1);
+
+        // If no relation exists, create one
+        if (!existingRelation[0]) {
+          await drizzleDb.insert(noteProfiles).values({
+            id: nanoid(),
+            profileId,
+            noteId: note.id,
+          });
         }
       } else {
-        profile = new Profile({
+        // Create new profile
+        profileId = nanoid();
+        await drizzleDb.insert(profiles).values({
+          id: profileId,
           profileTitle: name.trim(),
-          userId: notebook.userId,
-          notebookIDs: [notebook._id],
+          profileContent: "",
+          userId: note.userId,
+          timeCreated: Date.now(),
+          timeUpdated: Date.now(),
+        });
+
+        // Create relation to note
+        await drizzleDb.insert(noteProfiles).values({
+          id: nanoid(),
+          profileId,
+          noteId: note.id,
         });
       }
 
-      const notebooks = await Notebook.find({
-        _id: { $in: profile.notebookIDs },
-      });
-      const notebookContents = notebooks.map((n) => n.content);
+      // Get all notes associated with this profile
+      const noteLinks = await drizzleDb
+        .select({ noteId: noteProfiles.noteId })
+        .from(noteProfiles)
+        .where(eq(noteProfiles.profileId, profileId));
 
-      const profileData = await openaiService.createProfile(
-        name,
-        notebookContents,
-      );
+      const noteIds = noteLinks.map((link) => link.noteId);
+
+      // Get note contents
+      const noteResults = await drizzleDb
+        .select()
+        .from(notes)
+        .where(inArray(notes.id, noteIds));
+
+      const noteContents = noteResults.map((n) => n.content);
+
+      // Update profile data
+      const profileData = await openaiService.createProfile(name, noteContents);
+
       if (profileData) {
-        profile.profileTitle = profileData.name?.trim() || profile.profileTitle;
-        profile.profileContent = formatProfileContent(profileData);
+        await drizzleDb
+          .update(profiles)
+          .set({
+            profileTitle: profileData.name?.trim() || name.trim(),
+            profileContent: formatProfileContent(profileData),
+            timeUpdated: Date.now(),
+          })
+          .where(eq(profiles.id, profileId));
       }
-      profile.timeUpdated = Date.now();
-      await profile.save();
     }
   } else if (operation === "delete") {
-    const profiles = await Profile.find({ notebookIDs: notebook._id });
-    for (const profile of profiles) {
-      profile.notebookIDs = profile.notebookIDs.filter(
-        (id) => id.toString() !== notebook._id.toString(),
-      );
+    // Find profiles associated with this note
+    const profileLinks = await drizzleDb
+      .select({ profileId: noteProfiles.profileId })
+      .from(noteProfiles)
+      .where(eq(noteProfiles.noteId, note.id));
 
-      if (profile.notebookIDs.length === 0) {
-        await Profile.findByIdAndDelete(profile._id);
+    // Delete note-profile relationships
+    await drizzleDb
+      .delete(noteProfiles)
+      .where(eq(noteProfiles.noteId, note.id));
+
+    // For each profile, check if it has other notes
+    for (const { profileId } of profileLinks) {
+      const remainingLinks = await drizzleDb
+        .select()
+        .from(noteProfiles)
+        .where(eq(noteProfiles.profileId, profileId));
+
+      if (remainingLinks.length === 0) {
+        // If profile has no more notes, delete it
+        await drizzleDb.delete(profiles).where(eq(profiles.id, profileId));
       } else {
-        const notebooks = await Notebook.find({
-          _id: { $in: profile.notebookIDs },
-        });
-        const notebookContents = notebooks.map((n) => n.content);
+        // Otherwise, update profile data based on remaining notes
+        const noteIds = remainingLinks.map((link) => link.noteId);
+
+        const noteResults = await drizzleDb
+          .select()
+          .from(notes)
+          .where(inArray(notes.id, noteIds));
+
+        const noteContents = noteResults.map((n) => n.content);
+
+        const profileResult = await drizzleDb
+          .select()
+          .from(profiles)
+          .where(eq(profiles.id, profileId))
+          .limit(1);
+
+        const profile = profileResult[0];
+
         const profileData = await openaiService.createProfile(
           profile.profileTitle,
-          notebookContents,
+          noteContents,
         );
+
         if (profileData) {
-          profile.profileTitle =
-            profileData.name?.trim() || profile.profileTitle;
-          profile.profileContent = formatProfileContent(profileData);
+          await drizzleDb
+            .update(profiles)
+            .set({
+              profileTitle: profileData.name?.trim() || profile.profileTitle,
+              profileContent: formatProfileContent(profileData),
+              timeUpdated: Date.now(),
+            })
+            .where(eq(profiles.id, profileId));
         }
-        profile.timeUpdated = Date.now();
-        await profile.save();
       }
     }
   }

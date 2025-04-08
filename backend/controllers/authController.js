@@ -1,9 +1,13 @@
 import crypto from "node:crypto";
+import bcrypt from "bcrypt";
+import { and, eq, gt } from "drizzle-orm";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import { drizzleDb } from "../database/db.js";
+import { users } from "../database/schema.js";
 import resetPasswordEmailTemplate from "../services/emailTemplates/resetPasswordEmail.js";
 import verificationEmailTemplate from "../services/emailTemplates/verificationEmail.js";
 import sendEmail from "../services/sendEmail.js";
+import * as User from "./userController.js";
 
 // Register a new user
 export const register = async (req, res) => {
@@ -11,35 +15,31 @@ export const register = async (req, res) => {
     const { username, email, password } = req.body;
 
     // Check if a user with the same email or username already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-    if (existingUser) {
+    const existingUserByEmail = await User.findByEmail(email);
+    const existingUserByUsername = await User.findByUsername(username);
+
+    if (existingUserByEmail || existingUserByUsername) {
       return res.status(409).json({ error: "User already exists" });
     }
 
-    // Create a new user; the pre-save hook in the model will hash the password
-    const newUser = new User({
+    // Create a new user
+    const newUser = await User.create({
       username,
       email,
       password,
-      //SET TO FALSE LATER
       isVerified: false, // Initially not verified
-      journalIDs: [], // Empty array for journal IDs
-      summaryIDs: [], // Empty array for summary IDs
     });
-    await newUser.save();
 
     // Generate an email verification token (JWT) that expires in 1 day
     const verificationToken = jwt.sign(
-      { id: newUser._id },
+      { id: newUser.id },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
 
     const verificationLink = `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
 
-    // Use the new verification email template
+    // Use the verification email template
     const emailContent = verificationEmailTemplate(verificationLink);
 
     await sendEmail(
@@ -62,15 +62,19 @@ export const login = async (req, res) => {
     const { email, username, password } = req.body;
 
     // Allow login by email OR username
-    const user = await User.findOne({
-      $or: [{ email }, { username }],
-    });
+    let user = null;
+    if (email) {
+      user = await User.findByEmail(email);
+    } else if (username) {
+      user = await User.findByUsername(username);
+    }
+
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Compare password using the method defined on the user model
-    const isMatch = await user.comparePassword(password);
+    // Compare password
+    const isMatch = await User.comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -82,7 +86,7 @@ export const login = async (req, res) => {
 
     // Generate a JWT token for the session that expires in 1 hour
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
@@ -90,7 +94,7 @@ export const login = async (req, res) => {
     res.json({
       message: "Login successful",
       token,
-      userId: user._id, // Include userId here
+      userId: user.id,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -101,7 +105,7 @@ export const login = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findByEmail(email);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -110,13 +114,14 @@ export const forgotPassword = async (req, res) => {
     // Generate a reset token (a random string)
     const resetToken = crypto.randomBytes(20).toString("hex");
     // Set token expiry to 1 hour from now
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000;
-    await user.save();
+    await User.updateById(user.id, {
+      resetToken,
+      resetTokenExpiry: Date.now() + 3600000,
+    });
 
     const resetLink = `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
 
-    // Use the new password reset email template
+    // Use the password reset email template
     const resetContent = resetPasswordEmailTemplate(resetLink);
 
     await sendEmail(
@@ -125,7 +130,6 @@ export const forgotPassword = async (req, res) => {
       resetContent,
     );
 
-    // In production, send this token via email to the user
     res.json({ message: "Password reset email sent." });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -141,20 +145,32 @@ export const resetPassword = async (req, res) => {
     }
 
     // Find the user with a valid reset token
-    const user = await User.findOne({
-      resetToken,
-      resetTokenExpiry: { $gt: Date.now() },
-    });
+    const result = await drizzleDb
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.resetToken, resetToken),
+          gt(users.resetTokenExpiry, Date.now()),
+        ),
+      )
+      .limit(1);
 
+    const user = result[0];
     if (!user) {
       return res.status(400).json({ error: "Invalid or expired reset token" });
     }
 
-    // Update password; the pre-save hook will hash it
-    user.password = newPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    await user.save();
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user
+    await User.updateById(user.id, {
+      password: hashedPassword,
+      resetToken: null,
+      resetTokenExpiry: null,
+    });
 
     res.json({ message: "Password reset successful" });
   } catch (error) {
@@ -174,8 +190,7 @@ export const verifyEmail = async (req, res) => {
     }
 
     // Mark email as verified
-    user.isVerified = true;
-    await user.save();
+    await User.updateById(user.id, { isVerified: true });
 
     res.status(200).json({ message: "Email verified successfully" });
   } catch (error) {

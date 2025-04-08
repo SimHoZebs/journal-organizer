@@ -65,7 +65,7 @@ const verificationEmailTemplate = (verificationLink) => {
     </div>
     <div class="content">
       <h2>Welcome to Journal Organizer!</h2>
-      <p>Thank you for signing up. To complete your registration and start organizing your journals, please verify your email address.</p>
+      <p>Thank you for signing up. To complete your registration and start organizing your notes, please verify your email address.</p>
       <p><a href="${verificationLink}" class="button">Verify Email Address</a></p>
       <p>This link will expire in 24 hours.</p>
       <p>If you did not create an account, you can safely ignore this email.</p>

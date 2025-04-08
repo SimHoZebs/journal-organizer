@@ -34,7 +34,7 @@ const ProfileSchema = z.object({
   additionalNotes: z.string().nullable(),
 });
 
-export async function extractTags(journalContent) {
+export async function extractTags(noteContent) {
   const messages = [
     {
       role: "system",
@@ -43,7 +43,7 @@ export async function extractTags(journalContent) {
     },
     {
       role: "user",
-      content: `Extract only the main subject(s) — the primary person or people being described in detail — from the following text. Ignore passing mentions of others. Return only a valid JSON array of names. Example: ["Mary", "John"]. If no main subjects are found, return []. Text: "${journalContent}"`,
+      content: `Extract only the main subject(s) — the primary person or people being described in detail — from the following text. Ignore passing mentions of others. Return only a valid JSON array of names. Example: ["Mary", "John"]. If no main subjects are found, return []. Text: "${noteContent}"`,
     },
   ];
 
@@ -65,8 +65,8 @@ export async function extractTags(journalContent) {
   }
 }
 
-function buildProfilePrompt(name, notebookContents) {
-  const combinedNotes = notebookContents.join("\n\n");
+function buildProfilePrompt(name, noteContents) {
+  const combinedNotes = noteContents.join("\n\n");
   return [
     {
       role: "system",
@@ -114,8 +114,8 @@ ${combinedNotes}
   ];
 }
 
-export async function createProfile(name, notebookContents) {
-  const messages = buildProfilePrompt(name, notebookContents);
+export async function createProfile(name, noteContents) {
+  const messages = buildProfilePrompt(name, noteContents);
   try {
     const completion = await openai.beta.chat.completions.parse({
       model: "gpt-4o-mini-2024-07-18",

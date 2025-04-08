@@ -8,7 +8,7 @@ import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import DeleteNoteIcon from "../assets/icons/delete-note-icon.svg";
 import SaveNoteIcon from "../assets/icons/save-note-icon.svg";
 import handleLogout from "../utils/handleLogout";
-import searchJournal from "../utils/searchJournal";
+import searchNote from "../utils/searchNote";
 
 const Notes = () => {
   const [displayList, setDisplayList] = useState<
@@ -20,7 +20,7 @@ const Notes = () => {
     //state to manipulate such selected note
     title: string;
     content: string;
-    _id: string; //optional notebook ID
+    _id: string; //optional note ID
   }>({
     title: "",
     content: "",
@@ -47,7 +47,7 @@ const Notes = () => {
       );
       navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
   //function to either retrieve the selected note or create a new one (SideNav)
   const getSelectedNote = async (id: string) => {
@@ -61,7 +61,7 @@ const Notes = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/journal/read-notebook/${id}`,
+        `${import.meta.env.VITE_API_URL}/note/read-note/${id}`,
         {
           method: "GET",
           headers: {
@@ -81,29 +81,34 @@ const Notes = () => {
       }
       const data = await response.json();
       console.log(data.message);
-      console.log(data.notebook);
+      console.log(data.note);
 
-      setSelectedNote(data.notebook);
+      setSelectedNote(data.note);
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while fetching the journals.");
+      alert("An error occurred while fetching the notes.");
     }
   };
 
   const refreshNavBar = async () => {
-    const result = await searchJournal("");
-    console.log("searchJournal result", result);
-    setDisplayList(result || []); //set the displayList to the result of the searchJournal function
+    const result = await searchNote("");
+    console.log("searchNote result", result);
+    setDisplayList(result || []); //set the displayList to the result of the searchNote function
   };
 
   useEffect(() => {
+    const yeet = async () => {
+      const result = await searchNote("");
+      console.log("searchNote result", result);
+      setDisplayList(result || []); //set the displayList to the result of the searchNote function
+    };
     //display a new note when the page loads
     createNewNote();
-    refreshNavBar();
+    yeet();
     if (selectedNote.content === "") {
       setPreviewMode("edit");
     }
-  }, []);
+  }, [selectedNote.content]);
 
   const createNewNote = () => {
     setSelectedNote({
@@ -114,7 +119,7 @@ const Notes = () => {
   };
 
   //HANDLE SAVE----------------------------------------------------------------
-  const createNotebook = async () => {
+  const createNote = async () => {
     const userID = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
     // if (!token) {
@@ -129,9 +134,9 @@ const Notes = () => {
     //establish in order to use "selectedNotes"
     try {
       //start the API call
-      console.log("Creating notebook...");
+      console.log("Creating note...");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/journal/create-notebook`, //call "create-notebook" API
+        `${import.meta.env.VITE_API_URL}/note/create-note`, //call "create-note" API
         {
           method: "POST", //use POST method
           headers: {
@@ -159,9 +164,9 @@ const Notes = () => {
       const data = await response.json();
 
       console.log(data.message);
-      console.log(data.notebook);
+      console.log(data.note);
 
-      return data.notebook;
+      return data.note;
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while saving the note.");
@@ -169,13 +174,13 @@ const Notes = () => {
   }; //END OF HANDLESAVE--------------------------------------------------------------------
 
   //HANDLE UPDATE--------------------------------------------------------------------------
-  const updateNotebook = async () => {
+  const updateNote = async () => {
     const token = localStorage.getItem("token");
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/journal/update-notebook/${
-          //caall "update-notebook" API
+        `${import.meta.env.VITE_API_URL}/note/update-note/${
+          //caall "update-note" API
           selectedNote._id
         }`,
         {
@@ -201,9 +206,9 @@ const Notes = () => {
       }
       const data = await response.json();
       console.log(data.message);
-      console.log(data.notebook);
+      console.log(data.note);
 
-      return data.notebook;
+      return data.note;
     } catch (error) {
       console.error("Error:", error);
       alert(`An error occurred while saving the note. Error: ${error}`);
@@ -215,9 +220,7 @@ const Notes = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/journal/delete-notebook/${
-          selectedNote._id
-        }`, // Use the notebookId from selectedNotes to delete the specific note
+        `${import.meta.env.VITE_API_URL}/note/delete-note/${selectedNote._id}`, // Use the noteId from selectedNotes to delete the specific note
         {
           method: "DELETE", // Use DELETE method
           headers: {
@@ -225,7 +228,7 @@ const Notes = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            notebookId: selectedNote?._id,
+            noteId: selectedNote?._id,
           }),
         },
       );
@@ -272,6 +275,7 @@ const Notes = () => {
           }`}
         >
           <button //button to open/close the SideNav
+            type="button"
             className="p-1 rounded-lg hover:bg-neutral-600 cursor-pointer"
             onClick={() => setSideNavOpen(true)}
           >
@@ -334,22 +338,23 @@ const Notes = () => {
             <div className="relative">
               <div className="absolute top-4 right-4 flex gap-2">
                 <button //Save Button
+                  type="button"
                   className={`p-1 rounded-lg cursor-pointer ${
                     !selectedNote.content || !selectedNote.title
                       ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
                       : "hover:bg-neutral-500"
                   }`}
                   onClick={async () => {
-                    const notebook =
+                    const note =
                       selectedNote._id === ""
-                        ? await createNotebook()
-                        : await updateNotebook();
+                        ? await createNote()
+                        : await updateNote();
 
                     setSelectedNote((prev) =>
                       prev
                         ? {
                             ...prev,
-                            ...notebook,
+                            ...note,
                           }
                         : prev,
                     );
@@ -369,6 +374,7 @@ const Notes = () => {
                 </button>
 
                 <button //Delete Button
+                  type="button"
                   className={`p-1 rounded-lg cursor-pointer ${
                     !selectedNote.content || !selectedNote.title
                       ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"

@@ -7,10 +7,10 @@ import logoutIcon from "../assets/icons/logout-icon.svg";
 import notesPage from "../assets/icons/notes-page-icon.svg";
 import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 import handleLogout from "../utils/handleLogout"; // Function to handle logout
-import searchJournal from "../utils/searchJournal"; // Function to search journal entries
+import searchNote from "../utils/searchNote"; // Function to search note entries
 
 type Props = {
-  page: string; // Identifies the current page ("Notes" or "Summary")
+  page: string; // Identifies the current page ("Notes" or "profile")
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
   createNewNote: () => void; // A function to create a new note.
   getSelectedNote: (id: string) => void; // A function to handle selecting an item from the list.
@@ -70,6 +70,11 @@ const SideNav = ({
       <div
         ref={navModal}
         className="z-10 absolute top-0 left-0 w-dvw opacity-75 h-dvh sm:hidden bg-black"
+        onKeyDown={(event) => {
+          if (event.target === event.currentTarget) {
+            closeNav(false);
+          }
+        }}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
             closeNav(false);
@@ -80,6 +85,7 @@ const SideNav = ({
         {/* Top Nav */}
         <div className="flex items-center justify-between py-2 pl-2 pr-2.5 border-b border-neutral-50">
           <button
+            type="button"
             className="p-1 rounded-lg hover:bg-neutral-600 cursor-pointer"
             onClick={() => closeNav(false)}
           >
@@ -93,6 +99,7 @@ const SideNav = ({
           <div className="flex items-center justify-between gap-3">
             {page === "Notes" && (
               <button
+                type="button"
                 className={`p-1.5 rounded-lg cursor-pointer hover:bg-neutral-600  ${"hover:bg-gray-200"}`}
                 onClick={() => createNewNote()}
               >
@@ -104,7 +111,10 @@ const SideNav = ({
               </button>
             )}
             <Link to="/notes">
-              <button className="p-1.5 rounded-lg cursor-pointer bg-neutral-500">
+              <button
+                type="button"
+                className="p-1.5 rounded-lg cursor-pointer bg-neutral-500"
+              >
                 <img
                   className="w-[25px] h-[25px] invert brightness-0"
                   src={notesPage}
@@ -113,7 +123,10 @@ const SideNav = ({
               </button>
             </Link>
             <Link to="/relationships">
-              <button className="p-1.5 rounded-lg cursor-pointer hover:bg-neutral-600">
+              <button
+                type="button"
+                className="p-1.5 rounded-lg cursor-pointer hover:bg-neutral-600"
+              >
                 <img
                   className="w-[25px] h-[25px] invert brightness-0"
                   src={relationshipIcon}
@@ -131,16 +144,17 @@ const SideNav = ({
             value={search}
             onChange={async (event) => {
               setSearch(event.target.value);
-              const searchResults = await searchJournal(event.target.value);
+              const searchResults = await searchNote(event.target.value);
               setDisplayList(searchResults || []);
             }}
             placeholder={"Search Note"}
           />
 
           <div className="grow flex flex-col gap-1 overflow-auto mx-3.5">
-            {displayList.map((item, index) => (
+            {displayList.map((item, _) => (
               <button
-                key={index}
+                type="button"
+                key={item._id}
                 className={`text-left px-4 py-2 rounded-xl truncate shrink-0 text-neutral-50 ${
                   selectedId === item._id
                     ? "bg-neutral-500"
@@ -168,6 +182,7 @@ const SideNav = ({
               className="z-10 w-[calc(100%-16px)] absolute left-1.5 bottom-full mb-2 rounded-xl border-[0.5px] border-neutral-50 flex flex-col bg-neutral-600"
             >
               <button
+                type="button"
                 className="w-full flex items-center gap-2 py-2.5 px-5 hover:bg-neutral-500 rounded-xl cursor-pointer justify-start"
                 onClick={onLogout}
               >
@@ -184,6 +199,7 @@ const SideNav = ({
           )}
 
           <button
+            type="button"
             className="flex items-center border-t border-neutral-50 py-2.5 px-5 gap-3 cursor-pointer w-full hover:bg-neutral-700"
             onClick={() => {
               setUserDropdownOpen(true);

@@ -1,22 +1,143 @@
-import Profile from "../models/summary.js";
+import { and, eq, like, or } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { drizzleDb } from "../database/db.js";
+import { noteProfiles, notes, profiles } from "../database/schema.js";
+
+// Database operations (moved from models/profile.js)
+
+// Find a profile by ID
+export async function findById(id) {
+  const result = await drizzleDb
+    .select()
+    .from(profiles)
+    .where(eq(profiles.id, id))
+    .limit(1);
+  return result[0] || null;
+}
+
+// Find profiles by user ID
+export async function findByUserId(userId) {
+  const result = await drizzleDb
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, userId));
+  return result;
+}
+
+// Create a new profile
+export async function create({
+  profileTitle,
+  profileContent,
+  userId,
+  noteIds = [],
+}) {
+  const id = nanoid();
+
+  // Insert the profile
+  await drizzleDb.insert(profiles).values({
+    id,
+    profileTitle,
+    profileContent,
+    userId,
+    timeCreated: Date.now(),
+    timeUpdated: Date.now(),
+  });
+
+  // Add relationships to notes if provided
+  if (noteIds && noteIds.length > 0) {
+    const noteRelations = noteIds.map((noteId) => ({
+      id: nanoid(),
+      profileId: id,
+      noteId,
+    }));
+
+    await drizzleDb.insert(noteProfiles).values(noteRelations);
+  }
+
+  return findById(id);
+}
+
+// Update a profile
+export async function updateById(id, updateData) {
+  // Handle noteIds separately if present
+  const { noteIds, ...dataToUpdate } = updateData;
+
+  // Always update the timeUpdated field
+  dataToUpdate.timeUpdated = Date.now();
+
+  await drizzleDb.update(profiles).set(dataToUpdate).where(eq(profiles.id, id));
+
+  // Update note relationships if provided
+  if (noteIds) {
+    // Delete existing relationships
+    await drizzleDb.delete(noteProfiles).where(eq(noteProfiles.profileId, id));
+
+    // Add new relationships
+    if (noteIds.length > 0) {
+      const noteRelations = noteIds.map((noteId) => ({
+        id: nanoid(),
+        profileId: id,
+        noteId,
+      }));
+
+      await drizzleDb.insert(noteProfiles).values(noteRelations);
+    }
+  }
+
+  return findById(id);
+}
+
+// Delete a profile
+export async function deleteById(id) {
+  // First delete any note relationships
+  await drizzleDb.delete(noteProfiles).where(eq(noteProfiles.profileId, id));
+
+  // Then delete the profile
+  await drizzleDb.delete(profiles).where(eq(profiles.id, id));
+
+  return { id, deleted: true };
+}
+
+// Get notes associated with a profile
+export async function getNotes(profileId) {
+  const noteLinks = await drizzleDb
+    .select()
+    .from(noteProfiles)
+    .leftJoin(notes, eq(noteProfiles.noteId, notes.id))
+    .where(eq(noteProfiles.profileId, profileId));
+
+  return noteLinks
+    .map((link) => {
+      if (link.notes) {
+        // Parse tags back to array
+        return {
+          ...link.notes,
+          tags: JSON.parse(link.notes.tags),
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
+// HTTP Request handlers
 
 // Create profile manually
 export const createProfile = async (req, res) => {
   try {
-    const { profileTitle, profileContent, notebookIDs, userId } = req.body;
+    const { profileTitle, profileContent, noteIds, userId } = req.body;
 
     if (!profileTitle || !profileContent || !userId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const newProfile = new Profile({
+    const newProfile = await create({
       profileTitle,
       profileContent,
-      notebookIDs: Array.isArray(notebookIDs) ? notebookIDs : [],
+      noteIds: Array.isArray(noteIds) ? noteIds : [],
       userId,
     });
 
-    await newProfile.save();
     res
       .status(200)
       .json({ message: "Profile created successfully", profile: newProfile });
@@ -31,14 +152,20 @@ export const updateProfile = async (req, res) => {
     const { profileId } = req.params;
     const updatedData = req.body;
 
-    const profile = await Profile.findById(profileId);
+    const profile = await findById(profileId);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
 
-    Object.assign(profile, updatedData);
-    profile.timeUpdated = Date.now();
-    await profile.save();
+    // Make sure timeUpdated is always set
+    updatedData.timeUpdated = Date.now();
 
-    res.status(200).json({ message: "Profile updated successfully", profile });
+    const updatedProfile = await updateById(profileId, updatedData);
+
+    res
+      .status(200)
+      .json({
+        message: "Profile updated successfully",
+        profile: updatedProfile,
+      });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -47,8 +174,8 @@ export const updateProfile = async (req, res) => {
 export const deleteProfile = async (req, res) => {
   try {
     const { profileId } = req.params;
-    const deletedProfile = await Profile.findByIdAndDelete(profileId);
-    if (!deletedProfile)
+    const result = await deleteById(profileId);
+    if (!result.deleted)
       return res.status(404).json({ error: "Profile not found" });
     res.status(200).json({ message: "Profile successfully deleted" });
   } catch (error) {
@@ -59,7 +186,7 @@ export const deleteProfile = async (req, res) => {
 export const readProfile = async (req, res) => {
   try {
     const { profileId } = req.params;
-    const profile = await Profile.findById(profileId);
+    const profile = await findById(profileId);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
     res.status(200).json({ message: "Profile retrieved", profile });
   } catch (error) {
@@ -77,15 +204,26 @@ export const searchProfiles = async (req, res) => {
         .json({ error: "Missing userId or query parameter" });
     }
 
-    const profiles = await Profile.find({
-      userId,
-      $or: [
-        { profileTitle: { $regex: query, $options: "i" } },
-        { profileContent: { $regex: query, $options: "i" } },
-      ],
-    }).select("_id profileTitle");
+    const profileResults = await drizzleDb
+      .select({
+        id: profiles.id,
+        profileTitle: profiles.profileTitle,
+      })
+      .from(profiles)
+      .where(
+        and(
+          eq(profiles.userId, userId),
+          or(
+            like(profiles.profileTitle, `%${query}%`),
+            like(profiles.profileContent, `%${query}%`),
+          ),
+        ),
+      );
 
-    res.status(200).json({ message: "Search results retrieved", profiles });
+    res.status(200).json({
+      message: "Search results retrieved",
+      profiles: profileResults,
+    });
   } catch (error) {
     console.error("Error in searchProfiles:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -96,8 +234,22 @@ export const getProfileById = async (req, res) => {
   try {
     const { userId, profileId } = req.params;
 
-    const profile = await Profile.findOne({ _id: profileId, userId });
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
+    const profileResult = await drizzleDb
+      .select()
+      .from(profiles)
+      .where(and(eq(profiles.id, profileId), eq(profiles.userId, userId)))
+      .limit(1);
+
+    if (!profileResult[0])
+      return res.status(404).json({ error: "Profile not found" });
+
+    // Get associated notes
+    const notes = await getNotes(profileId);
+
+    const profile = {
+      ...profileResult[0],
+      notes,
+    };
 
     res.status(200).json({ message: "Profile retrieved", profile });
   } catch (error) {
@@ -112,12 +264,19 @@ export const getAllProfiles = async (req, res) => {
     if (!userId)
       return res.status(400).json({ error: "Missing userId parameter" });
 
-    const profiles = await Profile.find({ userId }).select(
-      "_id profileTitle timeCreated",
-    );
-    res
-      .status(200)
-      .json({ message: "Profiles retrieved successfully", profiles });
+    const profileResults = await drizzleDb
+      .select({
+        id: profiles.id,
+        profileTitle: profiles.profileTitle,
+        timeCreated: profiles.timeCreated,
+      })
+      .from(profiles)
+      .where(eq(profiles.userId, userId));
+
+    res.status(200).json({
+      message: "Profiles retrieved successfully",
+      profiles: profileResults,
+    });
   } catch (error) {
     console.error("Error in getAllProfiles:", error);
     res.status(500).json({ error: "Internal server error" });

@@ -1,4 +1,4 @@
-const searchJournal = async (query: string) => {
+const searchNote = async (query: string) => {
   const userID = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
   if (!userID || !token) {
@@ -9,7 +9,7 @@ const searchJournal = async (query: string) => {
 
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/journal/search?userId=${userID}&query=${encodeURIComponent(query)}`,
+      `${import.meta.env.VITE_API_URL}/note/search?userId=${userID}&query=${encodeURIComponent(query)}`,
       {
         method: "GET",
         headers: {
@@ -29,12 +29,12 @@ const searchJournal = async (query: string) => {
     const data = await response.json();
     console.log(data.message);
 
-    return data.notebooks;
+    return data.notes;
   } catch (error) {
     console.error("Error:", error);
-    alert("An error occurred while fetching the journals.");
+    alert("An error occurred while fetching the notes.");
     return null;
   }
 };
 
-export default searchJournal;
+export default searchNote;

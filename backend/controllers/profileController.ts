@@ -173,8 +173,9 @@ export const deleteProfile = async (req, res) => {
   try {
     const { profileId } = req.params;
     const result = await deleteById(profileId);
-    if (!result.deleted)
+    if (!result.deleted) {
       return res.status(404).json({ error: "Profile not found" });
+    }
     res.status(200).json({ message: "Profile successfully deleted" });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -238,8 +239,9 @@ export const getProfileById = async (req, res) => {
       .where(and(eq(profiles.id, profileId), eq(profiles.userId, userId)))
       .limit(1);
 
-    if (!profileResult[0])
+    if (!profileResult[0]) {
       return res.status(404).json({ error: "Profile not found" });
+    }
 
     // Get associated notes
     const notes = await getNotes(profileId);
@@ -259,8 +261,9 @@ export const getProfileById = async (req, res) => {
 export const getAllProfiles = async (req, res) => {
   try {
     const { userId } = req.params;
-    if (!userId)
+    if (!userId) {
       return res.status(400).json({ error: "Missing userId parameter" });
+    }
 
     const profileResults = await drizzleDb
       .select({

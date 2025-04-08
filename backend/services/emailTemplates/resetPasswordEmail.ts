@@ -77,7 +77,9 @@ const resetPasswordEmailTemplate = (resetLink) => {
       <p style="font-size: 12px; word-break: break-all;">${resetLink}</p>
     </div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} Journal Organizer. All rights reserved.</p>
+      <p>© ${
+    new Date().getFullYear()
+  } Journal Organizer. All rights reserved.</p>
       <p>This is an automated email. Please do not reply to this message.</p>
     </div>
   </div>

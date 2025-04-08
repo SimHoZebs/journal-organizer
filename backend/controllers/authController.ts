@@ -38,7 +38,8 @@ export const register = async (req, res) => {
       { expiresIn: "1d" },
     );
 
-    const verificationLink = `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
+    const verificationLink =
+      `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
 
     // Use the verification email template
     const emailContent = verificationEmailTemplate(verificationLink);
@@ -120,7 +121,8 @@ export const forgotPassword = async (req, res) => {
       resetTokenExpiry: Date.now() + 3600000,
     });
 
-    const resetLink = `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
+    const resetLink =
+      `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
 
     // Use the password reset email template
     const resetContent = resetPasswordEmailTemplate(resetLink);

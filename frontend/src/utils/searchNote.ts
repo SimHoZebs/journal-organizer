@@ -9,7 +9,9 @@ const searchNote = async (query: string) => {
 
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/note/search?userId=${userID}&query=${encodeURIComponent(query)}`,
+      `${import.meta.env.VITE_API_URL}/note/search?userId=${userID}&query=${
+        encodeURIComponent(query)
+      }`,
       {
         method: "GET",
         headers: {

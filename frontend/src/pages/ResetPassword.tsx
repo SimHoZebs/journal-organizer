@@ -100,7 +100,7 @@ const ResetPassword = () => {
             placeholder="Confirm New Password"
             className={`w-full px-3 py-2 border rounded-md mb-2 bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
               isSubmitted &&
-              (!confirmPassword || newPassword !== confirmPassword)
+                (!confirmPassword || newPassword !== confirmPassword)
                 ? "border-red-600"
                 : "border-neutral-500"
             }`}

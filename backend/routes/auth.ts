@@ -2,8 +2,8 @@ import type { FastifyInstance, FastifyPluginOptions } from "fastify";
 import authenticateToken from "../services/authenticateToken";
 import {
   login,
-  register,
   logout,
+  register,
   validate,
 } from "../controllers/authController";
 

@@ -44,7 +44,8 @@ export async function extractTags(noteContent) {
     },
     {
       role: "user",
-      content: `Extract only the main subject(s) — the primary person or people being described in detail — from the following text. Ignore passing mentions of others. Return only a valid JSON array of names. Example: ["Mary", "John"]. If no main subjects are found, return []. Text: "${noteContent}"`,
+      content:
+        `Extract only the main subject(s) — the primary person or people being described in detail — from the following text. Ignore passing mentions of others. Return only a valid JSON array of names. Example: ["Mary", "John"]. If no main subjects are found, return []. Text: "${noteContent}"`,
     },
   ];
 

@@ -7,12 +7,14 @@ import SideNav from "../components/SideNavProfile";
 
 const Relationships = () => {
   const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
-  const [selectedRelationship, setSelectedRelationship] = useState<{
-    profileTitle: string;
-    _id: string;
-    profileContent: string[];
-    [key: string]: unknown;
-  } | null>(null);
+  const [selectedRelationship, setSelectedRelationship] = useState<
+    {
+      profileTitle: string;
+      _id: string;
+      profileContent: string[];
+      [key: string]: unknown;
+    } | null
+  >(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
   const [authToken, setAuthToken] = useState<string>("");
@@ -98,37 +100,42 @@ const Relationships = () => {
           </span>
         </div>
 
-        {selectedRelationship ? (
-          <div
-            className={`px-10 ${
-              sideNavOpen ? "sm:px-10" : "sm:px-14"
-            } md:px-14 py-8 ${
-              sideNavOpen ? "sm:py-8" : "sm:py-12"
-            } md:py-12 flex flex-col gap-5 max-w-4xl mx-auto w-full`}
-          >
-            <h3 className="text-4xl font-semibold font-montserrat text-neutral-50">
-              {selectedRelationship.profileTitle}
-            </h3>
-            <div className="flex flex-col gap-1.5">
-              {selectedRelationship.profileContent.map((line, index) => (
-                <span key={index} className="text-[18px]/[1.6] text-neutral-50">
-                  {line}
-                </span>
-              ))}
+        {selectedRelationship
+          ? (
+            <div
+              className={`px-10 ${
+                sideNavOpen ? "sm:px-10" : "sm:px-14"
+              } md:px-14 py-8 ${
+                sideNavOpen ? "sm:py-8" : "sm:py-12"
+              } md:py-12 flex flex-col gap-5 max-w-4xl mx-auto w-full`}
+            >
+              <h3 className="text-4xl font-semibold font-montserrat text-neutral-50">
+                {selectedRelationship.profileTitle}
+              </h3>
+              <div className="flex flex-col gap-1.5">
+                {selectedRelationship.profileContent.map((line, index) => (
+                  <span
+                    key={index}
+                    className="text-[18px]/[1.6] text-neutral-50"
+                  >
+                    {line}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center">
-            <img
-              className="w[75px] h-[75px] invert brightness-0"
-              src={ghostIcon}
-              alt="Ghost Icon"
-            />
-            <h3 className="font-semibold font-montserrat text-2xl text-neutral-50">
-              No Profile is Selected
-            </h3>
-          </div>
-        )}
+          )
+          : (
+            <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center">
+              <img
+                className="w[75px] h-[75px] invert brightness-0"
+                src={ghostIcon}
+                alt="Ghost Icon"
+              />
+              <h3 className="font-semibold font-montserrat text-2xl text-neutral-50">
+                No Profile is Selected
+              </h3>
+            </div>
+          )}
       </div>
     </div>
   );

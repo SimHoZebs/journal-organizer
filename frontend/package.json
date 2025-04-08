@@ -7,8 +7,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "biome lint src",
-    "format": "biome format --write src",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -137,12 +137,12 @@ const SignUp = () => {
             placeholder="Password"
             className={`w-full px-3 py-2 border rounded-md bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
               isSubmitted &&
-              (
-                !password ||
+                (
+                  !password ||
                   password !== confirmPassword ||
                   password.length < 8 ||
                   !passwordRegex.test(password)
-              )
+                )
                 ? "border-red-600"
                 : "border-neutral-500"
             }`}
@@ -157,12 +157,12 @@ const SignUp = () => {
             placeholder="Confirm Password"
             className={`w-full px-3 py-2 border rounded-md bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
               isSubmitted &&
-              (
-                !confirmPassword ||
+                (
+                  !confirmPassword ||
                   password !== confirmPassword ||
                   confirmPassword.length < 8 ||
                   !passwordRegex.test(confirmPassword)
-              )
+                )
                 ? "border-red-600"
                 : "border-neutral-500"
             }`}

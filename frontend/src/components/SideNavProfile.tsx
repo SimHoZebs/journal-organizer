@@ -12,12 +12,14 @@ type Props = {
   userId: string; // User ID to fetch profiles
   authToken: string;
   setSelectedRelationship: React.Dispatch<
-    React.SetStateAction<{
-      [key: string]: unknown;
-      profileTitle: string;
-      _id: string;
-      profileContent: string[];
-    } | null>
+    React.SetStateAction<
+      {
+        [key: string]: unknown;
+        profileTitle: string;
+        _id: string;
+        profileContent: string[];
+      } | null
+    >
   >; // Function to set the selected relationship
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
 };
@@ -59,9 +61,9 @@ const SideNav: React.FC<Props> = ({
 
     try {
       const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/profile/search?userId=${userId}&query=${encodeURIComponent(query)}`,
+        `${import.meta.env.VITE_API_URL}/profile/search?userId=${userId}&query=${
+          encodeURIComponent(query)
+        }`,
         {
           method: "GET",
           headers: {

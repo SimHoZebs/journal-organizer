@@ -4,7 +4,8 @@ A monorepo workspace for the Journal Organizer application.
 
 ## Project Structure
 
-This project is organized as a pnpm workspace monorepo with the following structure:
+This project is organized as a pnpm workspace monorepo with the following
+structure:
 
 - `/frontend` - React + TypeScript frontend built with Vite
 - `/backend` - Deno-powered Fastify API server with LibSQL/Drizzle ORM
@@ -24,21 +25,25 @@ This project has undergone significant changes from the original repository:
 ## Setup Instructions
 
 1. Install required tools:
+
 - Deno (latest version)
 - pnpm
 
 2. Clone the Repository
+
 ```bash
 git clone git@github.com:SimHoZebs/journal-organizer.git
 cd journal-organizer
 ```
 
 3. Setup Environment and Install Dependencies
+
 ```bash
 pnpm install
 ```
 
 Create a `.env` file in the root directory with the following variables:
+
 ```
 LIBSQL_URL=your_libsql_url_or_local_file_path
 LIBSQL_AUTH_TOKEN=your_libsql_token_if_using_remote_db
@@ -48,11 +53,13 @@ OPENAI_API_KEY=your_openai_api_key
 ```
 
 4. Start the Application
+
 ```bash
 pnpm dev      # Start both backend and frontend
 ```
 
 Or run services separately:
+
 ```bash
 pnpm dev:frontend  # Start frontend only
 pnpm dev:backend   # Start backend only (using Deno)
@@ -70,7 +77,8 @@ pnpm dev:backend   # Start backend only (using Deno)
 
 ## Mobile Development Setup
 
-The mobile application is currently under development. More information will be added as it becomes available.
+The mobile application is currently under development. More information will be
+added as it becomes available.
 
 ## Managing Dependencies
 
@@ -125,7 +133,8 @@ pnpm --filter frontend test
 - **Frontend**: React 19, TypeScript, Vite
 - **Styling**: Tailwind CSS 4
 - **Backend**: Fastify, Drizzle ORM, LibSQL
-- **Database**: LibSQL (SQLite-compatible, can be used locally or with remote Turso)
+- **Database**: LibSQL (SQLite-compatible, can be used locally or with remote
+  Turso)
 - **Authentication**: JWT, bcrypt, email verification
 - **Email Services**: SendGrid
 - **AI Integration**: OpenAI API

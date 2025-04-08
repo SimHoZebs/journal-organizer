@@ -181,8 +181,7 @@ const Notes = () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/note/update-note/${
           //caall "update-note" API
-          selectedNote._id
-        }`,
+          selectedNote._id}`,
         {
           method: "PUT",
           headers: {
@@ -290,118 +289,120 @@ const Notes = () => {
           </span>
         </div>
 
-        {selectedNote ? ( //condition so "selectedNotes" can be manipulated
-          <div
-            className={`px-8 ${
-              //padding for the main content area
-              sideNavOpen ? "sm:px-10 sm:py-8" : "sm:px-14 sm:py-12"
-            } md:px-14 py-8 md:py-12 flex flex-col gap-5 max-w-4xl mx-auto h-full w-full`}
-          >
-            <input //input field for the note title
-              type="text"
-              placeholder="Enter Title Here..." //placeholder text
-              className="text-4xl font-semibold font-montserrat text-neutral-50"
-              value={selectedNote.title || ""} //use the title from selectedNotes
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                //use onChange along with React.ChangeEvent to modify the title
-                setSelectedNote((prev) =>
-                  prev ? { ...prev, title: e.target.value } : prev,
-                );
-              }}
-            />
+        {selectedNote
+          ? ( //condition so "selectedNotes" can be manipulated
+            <div
+              className={`px-8 ${
+                //padding for the main content area
+                sideNavOpen
+                  ? "sm:px-10 sm:py-8"
+                  : "sm:px-14 sm:py-12"} md:px-14 py-8 md:py-12 flex flex-col gap-5 max-w-4xl mx-auto h-full w-full`}
+            >
+              <input //input field for the note title
+                type="text"
+                placeholder="Enter Title Here..." //placeholder text
+                className="text-4xl font-semibold font-montserrat text-neutral-50"
+                value={selectedNote.title || ""} //use the title from selectedNotes
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  //use onChange along with React.ChangeEvent to modify the title
+                  setSelectedNote((prev) =>
+                    prev ? { ...prev, title: e.target.value } : prev
+                  );
+                }}
+              />
 
-            <MDEditor //text editor
-              value={selectedNote.content || ""} //use the content from selectedNotes
-              height="80%"
-              minHeight={300}
-              preview={previewMode}
-              onClick={() => {
-                setPreviewMode("edit");
-              }}
-              onChange={(value) => {
-                setSelectedNote((prev) =>
-                  prev ? { ...prev, content: value || "" } : prev,
-                );
-              }}
-              style={{
-                backgroundColor: "oklch(26.9% 0 0)",
-                color: "white", // Set text color to white
-                borderRadius: "8px", // Optional: Add rounded corners
-              }}
-              previewOptions={{
-                style: {
-                  backgroundColor: "oklch(26.9% 0 0)", // Change preview box background color
-                  color: "white", // Change preview text color
-                },
-              }}
-            />
-            <div className="relative">
-              <div className="absolute top-4 right-4 flex gap-2">
-                <button //Save Button
-                  type="button"
-                  className={`p-1 rounded-lg cursor-pointer ${
-                    !selectedNote.content || !selectedNote.title
-                      ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
-                      : "hover:bg-neutral-500"
-                  }`}
-                  onClick={async () => {
-                    const note =
-                      selectedNote._id === ""
+              <MDEditor //text editor
+                value={selectedNote.content || ""} //use the content from selectedNotes
+                height="80%"
+                minHeight={300}
+                preview={previewMode}
+                onClick={() => {
+                  setPreviewMode("edit");
+                }}
+                onChange={(value) => {
+                  setSelectedNote((prev) =>
+                    prev ? { ...prev, content: value || "" } : prev
+                  );
+                }}
+                style={{
+                  backgroundColor: "oklch(26.9% 0 0)",
+                  color: "white", // Set text color to white
+                  borderRadius: "8px", // Optional: Add rounded corners
+                }}
+                previewOptions={{
+                  style: {
+                    backgroundColor: "oklch(26.9% 0 0)", // Change preview box background color
+                    color: "white", // Change preview text color
+                  },
+                }}
+              />
+              <div className="relative">
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button //Save Button
+                    type="button"
+                    className={`p-1 rounded-lg cursor-pointer ${
+                      !selectedNote.content || !selectedNote.title
+                        ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
+                        : "hover:bg-neutral-500"
+                    }`}
+                    onClick={async () => {
+                      const note = selectedNote._id === ""
                         ? await createNote()
                         : await updateNote();
 
-                    setSelectedNote((prev) =>
-                      prev
-                        ? {
+                      setSelectedNote((prev) =>
+                        prev
+                          ? {
                             ...prev,
                             ...note,
                           }
-                        : prev,
-                    );
-                    setPreviewMode("preview");
-                    await refreshNavBar();
-                  }}
-                  disabled={
-                    //disable the button if the title is empty
-                    selectedNote?.title === "" || selectedNote?.content === ""
-                  }
-                >
-                  <img //icon for button
-                    src={SaveNoteIcon}
-                    alt="Save Icon"
-                    className="w-[40px] h-[35px] invert brightness-0"
-                  />
-                </button>
+                          : prev
+                      );
+                      setPreviewMode("preview");
+                      await refreshNavBar();
+                    }}
+                    disabled={
+                      //disable the button if the title is empty
+                      selectedNote?.title === "" || selectedNote?.content === ""
+                    }
+                  >
+                    <img //icon for button
+                      src={SaveNoteIcon}
+                      alt="Save Icon"
+                      className="w-[40px] h-[35px] invert brightness-0"
+                    />
+                  </button>
 
-                <button //Delete Button
-                  type="button"
-                  className={`p-1 rounded-lg cursor-pointer ${
-                    !selectedNote.content || !selectedNote.title
-                      ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
-                      : "hover:bg-neutral-500"
-                  }`}
-                  onClick={async () => {
-                    await handleDelete();
-                    createNewNote();
-                    await refreshNavBar();
-                  }}
-                  disabled={
-                    //disable the button if the title is empty
-                    selectedNote?.title === "" || selectedNote?.content === ""
-                  }
-                >
-                  <img
-                    src={DeleteNoteIcon}
-                    alt="Delete Icon"
-                    className="w-[35px] h-[35px] invert brightness-0"
-                  />
-                </button>
+                  <button //Delete Button
+                    type="button"
+                    className={`p-1 rounded-lg cursor-pointer ${
+                      !selectedNote.content || !selectedNote.title
+                        ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
+                        : "hover:bg-neutral-500"
+                    }`}
+                    onClick={async () => {
+                      await handleDelete();
+                      createNewNote();
+                      await refreshNavBar();
+                    }}
+                    disabled={
+                      //disable the button if the title is empty
+                      selectedNote?.title === "" || selectedNote?.content === ""
+                    }
+                  >
+                    <img
+                      src={DeleteNoteIcon}
+                      alt="Delete Icon"
+                      className="w-[35px] h-[35px] invert brightness-0"
+                    />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center" />
-        )}
+          )
+          : (
+            <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center" />
+          )}
       </div>
     </div>
   );

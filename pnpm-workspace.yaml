@@ -2,6 +2,7 @@ packages:
   - frontend
   - backend
 onlyBuiltDependencies:
+  - '@biomejs/biome'
   - bcrypt
   - es5-ext
   - esbuild

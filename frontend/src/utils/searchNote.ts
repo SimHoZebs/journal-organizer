@@ -1,22 +1,13 @@
 const searchNote = async (query: string) => {
-  const userID = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
-  if (!userID || !token) {
-    console.error("User ID or Auth Token is missing.");
-    window.location.href = "/login";
-    return null;
-  }
-
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/note/search?userId=${userID}&query=${
+      `${import.meta.env.VITE_API_URL}/api/note/search?query=${
         encodeURIComponent(query)
       }`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       },
     );

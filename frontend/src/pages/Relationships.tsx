@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useState } from "react";
 import closeErrorDialog from "../assets/icons/Xmark.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import ghostIcon from "../assets/icons/ghost-icon.svg";
@@ -10,50 +9,18 @@ const Relationships = () => {
   const [selectedRelationship, setSelectedRelationship] = useState<
     {
       profileTitle: string;
-      _id: string;
+      id: string;
       profileContent: string[];
       [key: string]: unknown;
     } | null
   >(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>("");
-  const [authToken, setAuthToken] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    const storedUserName = localStorage.getItem("username");
-    const storedToken = localStorage.getItem("token");
-    if (storedUserId && storedUserName && storedToken) {
-      setAuthToken(storedToken);
-      setUserId(storedUserId);
-      setUserName(storedUserName);
-    } else {
-      setErrorMessage("UserID, Username, or AuthToken not found.");
-      console.error(
-        "UserID, Username, or AuthToken not found in local storage.",
-      );
-      navigate("/login");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (errorMessage) {
-      setTimeout(() => {
-        setErrorMessage("");
-      }, 3000);
-    }
-  }, [errorMessage]);
 
   return (
     <div className="flex h-dvh overflow-hidden relative">
-      {sideNavOpen && userId !== null && (
+      {sideNavOpen && (
         <SideNav
           closeNav={setSideNavOpen}
-          userName={userName}
-          userId={userId}
-          authToken={authToken}
           setSelectedRelationship={setSelectedRelationship}
           setErrorMessage={setErrorMessage}
         />

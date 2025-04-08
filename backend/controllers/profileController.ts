@@ -1,9 +1,9 @@
-import { and, eq, like, or } from "drizzle-orm";
+import { eq, like, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { drizzleDb } from "../database/db.js";
-import { noteProfiles, notes, profiles } from "../database/schema.js";
+import { drizzleDb } from "../database/db.ts";
+import { noteProfiles, notes, profiles } from "../database/schema.ts";
 
-// Database operations (moved from models/profile.js)
+// Database operations
 
 // Find a profile by ID
 export async function findById(id) {
@@ -15,22 +15,14 @@ export async function findById(id) {
   return result[0] || null;
 }
 
-// Find profiles by user ID
-export async function findByUserId(userId) {
-  const result = await drizzleDb
-    .select()
-    .from(profiles)
-    .where(eq(profiles.userId, userId));
+// Find all profiles
+export async function findAll() {
+  const result = await drizzleDb.select().from(profiles);
   return result;
 }
 
 // Create a new profile
-export async function create({
-  profileTitle,
-  profileContent,
-  userId,
-  noteIds = [],
-}) {
+export async function create({ profileTitle, profileContent, noteIds = [] }) {
   const id = nanoid();
 
   // Insert the profile
@@ -38,7 +30,6 @@ export async function create({
     id,
     profileTitle,
     profileContent,
-    userId,
     timeCreated: Date.now(),
     timeUpdated: Date.now(),
   });
@@ -125,9 +116,9 @@ export async function getNotes(profileId) {
 // Create profile manually
 export const createProfile = async (req, res) => {
   try {
-    const { profileTitle, profileContent, noteIds, userId } = req.body;
+    const { profileTitle, profileContent, noteIds } = req.body;
 
-    if (!profileTitle || !profileContent || !userId) {
+    if (!profileTitle || !profileContent) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -135,7 +126,6 @@ export const createProfile = async (req, res) => {
       profileTitle,
       profileContent,
       noteIds: Array.isArray(noteIds) ? noteIds : [],
-      userId,
     });
 
     res
@@ -195,12 +185,10 @@ export const readProfile = async (req, res) => {
 
 export const searchProfiles = async (req, res) => {
   try {
-    const { userId, query } = req.query;
+    const { query } = req.query;
 
-    if (!userId || query === null || query === undefined) {
-      return res
-        .status(400)
-        .json({ error: "Missing userId or query parameter" });
+    if (query === null || query === undefined) {
+      return res.status(400).json({ error: "Missing query parameter" });
     }
 
     const profileResults = await drizzleDb
@@ -210,12 +198,9 @@ export const searchProfiles = async (req, res) => {
       })
       .from(profiles)
       .where(
-        and(
-          eq(profiles.userId, userId),
-          or(
-            like(profiles.profileTitle, `%${query}%`),
-            like(profiles.profileContent, `%${query}%`),
-          ),
+        or(
+          like(profiles.profileTitle, `%${query}%`),
+          like(profiles.profileContent, `%${query}%`),
         ),
       );
 
@@ -231,12 +216,12 @@ export const searchProfiles = async (req, res) => {
 
 export const getProfileById = async (req, res) => {
   try {
-    const { userId, profileId } = req.params;
+    const { profileId } = req.params;
 
     const profileResult = await drizzleDb
       .select()
       .from(profiles)
-      .where(and(eq(profiles.id, profileId), eq(profiles.userId, userId)))
+      .where(eq(profiles.id, profileId))
       .limit(1);
 
     if (!profileResult[0]) {
@@ -260,19 +245,13 @@ export const getProfileById = async (req, res) => {
 
 export const getAllProfiles = async (req, res) => {
   try {
-    const { userId } = req.params;
-    if (!userId) {
-      return res.status(400).json({ error: "Missing userId parameter" });
-    }
-
     const profileResults = await drizzleDb
       .select({
         id: profiles.id,
         profileTitle: profiles.profileTitle,
         timeCreated: profiles.timeCreated,
       })
-      .from(profiles)
-      .where(eq(profiles.userId, userId));
+      .from(profiles);
 
     res.status(200).json({
       message: "Profiles retrieved successfully",

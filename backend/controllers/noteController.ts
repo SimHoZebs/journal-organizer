@@ -1,4 +1,4 @@
-import { and, eq, like, or } from "drizzle-orm";
+import { eq, like, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { drizzleDb } from "../database/db.js";
 import { noteProfiles, notes, profiles } from "../database/schema.js";
@@ -18,12 +18,11 @@ export async function findById(id) {
   return result[0] || null;
 }
 
-// Find notes by user ID
-export async function findByUserId(userId) {
+// Find all notes
+export async function findAll() {
   const result = await drizzleDb
     .select()
-    .from(notes)
-    .where(eq(notes.userId, userId));
+    .from(notes);
   // Parse tags for each note
   return result.map((note) => {
     return {
@@ -74,7 +73,7 @@ export async function getProfiles(noteId) {
 
 export const createNote = async (req, res) => {
   try {
-    const { title, content, userId } = req.body;
+    const { title, content } = req.body;
 
     // Generate a new ID for the note
     const id = nanoid();
@@ -88,7 +87,6 @@ export const createNote = async (req, res) => {
       title,
       content,
       tags: parsedTags,
-      userId,
       timeCreated: Date.now(),
       timeUpdated: Date.now(),
     });
@@ -195,12 +193,10 @@ export const readNote = async (req, res) => {
 
 export const searchNotes = async (req, res) => {
   try {
-    const { userId, query } = req.query;
+    const { query } = req.query;
 
-    if (!userId || query === null || query === undefined) {
-      return res
-        .status(400)
-        .json({ error: "Missing userId or query parameter" });
+    if (query === null || query === undefined) {
+      return res.status(400).json({ error: "Missing query parameter" });
     }
 
     // With LibSQL, we need to use LIKE queries for text search
@@ -208,12 +204,9 @@ export const searchNotes = async (req, res) => {
       .select({ id: notes.id, title: notes.title })
       .from(notes)
       .where(
-        and(
-          eq(notes.userId, userId),
-          or(
-            like(notes.title, `%${query}%`),
-            like(notes.content, `%${query}%`),
-          ),
+        or(
+          like(notes.title, `%${query}%`),
+          like(notes.content, `%${query}%`),
         ),
       );
 
@@ -229,7 +222,7 @@ export const searchNotes = async (req, res) => {
 
 export const getNoteById = async (req, res) => {
   try {
-    const { userId, noteId } = req.params;
+    const { noteId } = req.params;
 
     if (!noteId) {
       return res.status(400).json({ error: "Invalid noteId" });
@@ -238,7 +231,7 @@ export const getNoteById = async (req, res) => {
     const note = await drizzleDb
       .select()
       .from(notes)
-      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+      .where(eq(notes.id, noteId))
       .limit(1);
 
     if (!note[0]) {
@@ -261,23 +254,16 @@ export const getNoteById = async (req, res) => {
   }
 };
 
-// GET /note/all/:userId
+// GET /note/all
 export const getAllNotes = async (req, res) => {
   try {
-    const { userId } = req.params;
-
-    if (!userId) {
-      return res.status(400).json({ error: "Missing userId parameter" });
-    }
-
     const noteResults = await drizzleDb
       .select({
         id: notes.id,
         title: notes.title,
         timeCreated: notes.timeCreated,
       })
-      .from(notes)
-      .where(eq(notes.userId, userId));
+      .from(notes);
 
     res.status(200).json({
       message: "Notes retrieved successfully",

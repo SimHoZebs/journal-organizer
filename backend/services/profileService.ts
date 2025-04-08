@@ -89,12 +89,7 @@ export const updateProfilesForNote = async (note, operation) => {
       const profileResult = await drizzleDb
         .select()
         .from(profiles)
-        .where(
-          and(
-            eq(profiles.userId, note.userId),
-            like(profiles.profileTitle, normalized),
-          ),
-        )
+        .where(like(profiles.profileTitle, normalized))
         .limit(1);
 
       const profile = profileResult[0];
@@ -130,7 +125,6 @@ export const updateProfilesForNote = async (note, operation) => {
           id: profileId,
           profileTitle: name.trim(),
           profileContent: "",
-          userId: note.userId,
           timeCreated: Date.now(),
           timeUpdated: Date.now(),
         });

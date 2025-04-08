@@ -13,12 +13,11 @@ export default async function (
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
-  // Register the authenticate hook for all routes
   fastify.post("/create-note", createNote);
   fastify.put("/update-note/:noteId", updateNote);
   fastify.delete("/delete-note/:noteId", deleteNote);
   fastify.get("/read-note/:noteId", readNote);
   fastify.get("/search", searchNotes);
-  fastify.get("/all/:userId", getAllNotes);
-  fastify.get("/:userId/:noteId", getNoteById);
+  fastify.get("/all", getAllNotes);
+  fastify.get("/:noteId", getNoteById);
 }

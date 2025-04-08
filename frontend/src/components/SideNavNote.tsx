@@ -1,12 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useRef, useState } from "react";
+import { Link } from "react-router";
 import addNoteIcon from "../assets/icons/add-new-note-icon.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
-import contactIcon from "../assets/icons/contact-icon.svg";
-import logoutIcon from "../assets/icons/logout-icon.svg";
 import notesPage from "../assets/icons/notes-page-icon.svg";
 import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
-import handleLogout from "../utils/handleLogout"; // Function to handle logout
 import searchNote from "../utils/searchNote"; // Function to search note entries
 
 type Props = {
@@ -14,11 +11,11 @@ type Props = {
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
   createNewNote: () => void; // A function to create a new note.
   getSelectedNote: (id: string) => void; // A function to handle selecting an item from the list.
-  displayList: { _id: string; title: string }[]; // List of notes/relationships to display in the side navigation.
+  displayList: { id: string; title: string }[]; // List of notes to display in the side navigation.
   setDisplayList: React.Dispatch<
     React.SetStateAction<
       {
-        _id: string;
+        id: string;
         title: string;
       }[]
     >
@@ -34,36 +31,8 @@ const SideNav = ({
   setDisplayList,
 }: Props) => {
   const [search, setSearch] = useState<string>(""); // Search Input
-
-  const [selectedId, setSelectedId] = useState<string | null>(null); // Store ID of Notes/Relationships
-  const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false); // User Dropdown State
-  const userDropdown = useRef<HTMLDivElement>(null); // User Dropdown Ref
+  const [selectedId, setSelectedId] = useState<string | null>(null); // Store ID of selected note
   const navModal = useRef<HTMLDivElement>(null); // Nav Black Part
-  const navigate = useNavigate();
-
-  const onLogout = () => {
-    handleLogout();
-    navigate("/login");
-  };
-
-  useEffect(() => {
-    const removeUserDropdown = (event: MouseEvent): void => {
-      if (!userDropdown.current?.contains(event.target as Node)) {
-        if (event.target !== navModal.current) {
-          event.stopPropagation();
-        }
-        setUserDropdownOpen(false);
-      }
-    };
-
-    if (userDropdownOpen) {
-      document.addEventListener("click", removeUserDropdown, true);
-    }
-
-    return () => {
-      document.removeEventListener("click", removeUserDropdown, true);
-    };
-  }, [userDropdownOpen]);
 
   return (
     <>
@@ -151,18 +120,18 @@ const SideNav = ({
           />
 
           <div className="grow flex flex-col gap-1 overflow-auto mx-3.5">
-            {displayList.map((item, _) => (
+            {displayList.map((item) => (
               <button
                 type="button"
-                key={item._id}
+                key={item.id}
                 className={`text-left px-4 py-2 rounded-xl truncate shrink-0 text-neutral-50 ${
-                  selectedId === item._id
+                  selectedId === item.id
                     ? "bg-neutral-500"
                     : "hover:bg-neutral-600"
                 }`}
                 onClick={async () => {
-                  getSelectedNote(item._id);
-                  setSelectedId(item._id);
+                  getSelectedNote(item.id);
+                  setSelectedId(item.id);
                   if (window.innerWidth < 640) {
                     closeNav(false);
                   }
@@ -172,48 +141,6 @@ const SideNav = ({
               </button>
             ))}
           </div>
-        </div>
-
-        {/* User Profile Section */}
-        <div className="relative">
-          {userDropdownOpen && (
-            <div
-              ref={userDropdown}
-              className="z-10 w-[calc(100%-16px)] absolute left-1.5 bottom-full mb-2 rounded-xl border-[0.5px] border-neutral-50 flex flex-col bg-neutral-600"
-            >
-              <button
-                type="button"
-                className="w-full flex items-center gap-2 py-2.5 px-5 hover:bg-neutral-500 rounded-xl cursor-pointer justify-start"
-                onClick={onLogout}
-              >
-                <img
-                  className="w-[20px] h-[20px] invert brightness-0"
-                  src={logoutIcon}
-                  alt="Logout Icon"
-                />
-                <span className="whitespace-nowrap text-neutral-50">
-                  Logout
-                </span>
-              </button>
-            </div>
-          )}
-
-          <button
-            type="button"
-            className="flex items-center border-t border-neutral-50 py-2.5 px-5 gap-3 cursor-pointer w-full hover:bg-neutral-700"
-            onClick={() => {
-              setUserDropdownOpen(true);
-            }}
-          >
-            <img
-              className="w-[32px] h-[32px] p-0.5 rounded-full border-[1.5px] border-neutral-50 invert brightness-0"
-              src={contactIcon}
-              alt="User Contact Icon"
-            />
-            <span className="text-lg truncate text-neutral-50">
-              {localStorage.getItem("username") || "User Name"}
-            </span>
-          </button>
         </div>
       </div>
     </>

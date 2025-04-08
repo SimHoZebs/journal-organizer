@@ -1,79 +1,43 @@
 import MDEditor, { type PreviewType } from "@uiw/react-md-editor";
-import { useEffect, useState } from "react"; //import some hooks
-import { useNavigate } from "react-router";
-import SideNav from "../components/SideNavNote"; //import the SideNav component
+import { useEffect, useState } from "react";
+import SideNav from "../components/SideNavNote";
 
 //icons
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import DeleteNoteIcon from "../assets/icons/delete-note-icon.svg";
 import SaveNoteIcon from "../assets/icons/save-note-icon.svg";
-import handleLogout from "../utils/handleLogout";
 import searchNote from "../utils/searchNote";
 
 const Notes = () => {
   const [displayList, setDisplayList] = useState<
-    { _id: string; title: string }[]
-  >([]); // List of Notes/Relationships to display in SideNav
-  const [sideNavOpen, setSideNavOpen] = useState<boolean>(true); //state to control SideNav visibility
+    { id: string; title: string }[]
+  >([]);
+  const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
   const [previewMode, setPreviewMode] = useState<PreviewType>("preview");
   const [selectedNote, setSelectedNote] = useState<{
-    //state to manipulate such selected note
     title: string;
     content: string;
-    _id: string; //optional note ID
+    id: string;
   }>({
     title: "",
     content: "",
-    _id: "",
+    id: "",
   });
-  const navigate = useNavigate(); //useNavigate hook to navigate between pages
 
-  const handleAuthError = (response: Response) => {
-    if (response.status === 403 || response.status === 401) {
-      console.error("Session expired. Please log in again");
-      handleLogout();
-      navigate("/login");
-      return true;
-    }
-    return false;
-  };
-
-  useEffect(() => {
-    const userID = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
-    if (!userID && !token) {
-      console.error(
-        "UserID, Username, or AuthToken not found in local storage.",
-      );
-      navigate("/login");
-    }
-  }, [navigate]);
-
-  //function to either retrieve the selected note or create a new one (SideNav)
+  //function to retrieve the selected note
   const getSelectedNote = async (id: string) => {
-    const userID = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
-
-    if (userID === null) {
-      console.error("User ID is not available in local storage.");
-      return;
-    }
-
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/note/read-note/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/note/${id}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         },
       );
 
       if (!response.ok) {
-        if (handleAuthError(response)) return;
-
         const errorText = await response.text();
         throw new Error(
           `Server error ${response.status}: ${errorText || "No details"}`,
@@ -93,18 +57,19 @@ const Notes = () => {
   const refreshNavBar = async () => {
     const result = await searchNote("");
     console.log("searchNote result", result);
-    setDisplayList(result || []); //set the displayList to the result of the searchNote function
+    setDisplayList(result || []);
   };
 
   useEffect(() => {
-    const yeet = async () => {
+    const fetchNotes = async () => {
       const result = await searchNote("");
       console.log("searchNote result", result);
-      setDisplayList(result || []); //set the displayList to the result of the searchNote function
+      setDisplayList(result || []);
     };
+    
     //display a new note when the page loads
     createNewNote();
-    yeet();
+    fetchNotes();
     if (selectedNote.content === "") {
       setPreviewMode("edit");
     }
@@ -114,47 +79,30 @@ const Notes = () => {
     setSelectedNote({
       title: "Untitled Note",
       content: "",
-      _id: "",
+      id: "",
     });
   };
 
   //HANDLE SAVE----------------------------------------------------------------
   const createNote = async () => {
-    const userID = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
-    // if (!token) {
-    //   console.error("Token is not available in local storage.");
-    //   return;
-    // }
-    if (!userID) {
-      console.error("User ID is not available in local storage.");
-      return;
-    }
-
-    //establish in order to use "selectedNotes"
     try {
-      //start the API call
       console.log("Creating note...");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/note/create-note`, //call "create-note" API
+        `${import.meta.env.VITE_API_URL}/api/note/create-note`,
         {
-          method: "POST", //use POST method
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, //use the token from localStorage
           },
           body: JSON.stringify({
             title: selectedNote.title,
             content: selectedNote.content,
-            userId: userID,
           }),
         },
       );
       console.log("second base");
 
       if (!response.ok) {
-        if (handleAuthError(response)) return;
-
         const errorText = await response.text();
         throw new Error(
           `Server error ${response.status}: ${errorText || "No details"}`,
@@ -171,22 +119,17 @@ const Notes = () => {
       console.error("Error:", error);
       alert("An error occurred while saving the note.");
     }
-  }; //END OF HANDLESAVE--------------------------------------------------------------------
+  };
 
   //HANDLE UPDATE--------------------------------------------------------------------------
   const updateNote = async () => {
-    const token = localStorage.getItem("token");
-
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/note/update-note/${
-          //caall "update-note" API
-          selectedNote._id}`,
+        `${import.meta.env.VITE_API_URL}/api/note/update-note/${selectedNote.id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             title: selectedNote.title,
@@ -196,8 +139,6 @@ const Notes = () => {
       );
 
       if (!response.ok) {
-        if (handleAuthError(response)) return;
-
         const errorText = await response.text();
         throw new Error(
           `Server error ${response.status}: ${errorText || "No details"}`,
@@ -212,29 +153,22 @@ const Notes = () => {
       console.error("Error:", error);
       alert(`An error occurred while saving the note. Error: ${error}`);
     }
-  }; //END OF HANDLE UPDATE--------------------------------------------------------------------------
+  };
 
   //HANDLE DELETE---------------------------------------------------------------------------
   const handleDelete = async () => {
-    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/note/delete-note/${selectedNote._id}`, // Use the noteId from selectedNotes to delete the specific note
+        `${import.meta.env.VITE_API_URL}/api/note/delete-note/${selectedNote.id}`,
         {
-          method: "DELETE", // Use DELETE method
+          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            noteId: selectedNote?._id,
-          }),
         },
       );
 
       if (!response.ok) {
-        if (handleAuthError(response)) return;
-
         const errorText = await response.text();
         throw new Error(
           `Server error ${response.status}: ${errorText || "No details"}`,
@@ -244,17 +178,16 @@ const Notes = () => {
       console.log(data.message);
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while saving the note.");
+      alert("An error occurred while deleting the note.");
     }
   };
-  //END OF HANDLE DELETE--------------------------------------------------------------------------
 
   //return the components created
   return (
     <div className="flex h-dvh overflow-hidden relative">
-      {sideNavOpen && ( //if the SideNav is set to open, display it
+      {sideNavOpen && (
         <SideNav
-          displayList={displayList} //pass the displayList to the SideNav component
+          displayList={displayList}
           createNewNote={createNewNote}
           getSelectedNote={getSelectedNote}
           page="Notes"
@@ -263,7 +196,7 @@ const Notes = () => {
         />
       )}
 
-      <div //main content area
+      <div
         className={`flex flex-col w-full h-full sm:overflow-y-auto bg-neutral-700 ${
           sideNavOpen && "overflow-y-hidden"
         }`}
@@ -273,12 +206,12 @@ const Notes = () => {
             sideNavOpen && "sm:hidden"
           }`}
         >
-          <button //button to open/close the SideNav
+          <button
             type="button"
             className="p-1 rounded-lg hover:bg-neutral-600 cursor-pointer"
             onClick={() => setSideNavOpen(true)}
           >
-            <img //icon to open/close the SideNav
+            <img
               className="w-[25px] h-[25px] rotate-180 invert brightness-0"
               src={closeSideNav}
               alt="Open Navbar Icon"
@@ -290,29 +223,27 @@ const Notes = () => {
         </div>
 
         {selectedNote
-          ? ( //condition so "selectedNotes" can be manipulated
+          ? (
             <div
               className={`px-8 ${
-                //padding for the main content area
                 sideNavOpen
                   ? "sm:px-10 sm:py-8"
                   : "sm:px-14 sm:py-12"} md:px-14 py-8 md:py-12 flex flex-col gap-5 max-w-4xl mx-auto h-full w-full`}
             >
-              <input //input field for the note title
+              <input
                 type="text"
-                placeholder="Enter Title Here..." //placeholder text
+                placeholder="Enter Title Here..."
                 className="text-4xl font-semibold font-montserrat text-neutral-50"
-                value={selectedNote.title || ""} //use the title from selectedNotes
+                value={selectedNote.title || ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  //use onChange along with React.ChangeEvent to modify the title
                   setSelectedNote((prev) =>
                     prev ? { ...prev, title: e.target.value } : prev
                   );
                 }}
               />
 
-              <MDEditor //text editor
-                value={selectedNote.content || ""} //use the content from selectedNotes
+              <MDEditor
+                value={selectedNote.content || ""}
                 height="80%"
                 minHeight={300}
                 preview={previewMode}
@@ -326,19 +257,19 @@ const Notes = () => {
                 }}
                 style={{
                   backgroundColor: "oklch(26.9% 0 0)",
-                  color: "white", // Set text color to white
-                  borderRadius: "8px", // Optional: Add rounded corners
+                  color: "white",
+                  borderRadius: "8px",
                 }}
                 previewOptions={{
                   style: {
-                    backgroundColor: "oklch(26.9% 0 0)", // Change preview box background color
-                    color: "white", // Change preview text color
+                    backgroundColor: "oklch(26.9% 0 0)",
+                    color: "white",
                   },
                 }}
               />
               <div className="relative">
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <button //Save Button
+                  <button
                     type="button"
                     className={`p-1 rounded-lg cursor-pointer ${
                       !selectedNote.content || !selectedNote.title
@@ -346,7 +277,7 @@ const Notes = () => {
                         : "hover:bg-neutral-500"
                     }`}
                     onClick={async () => {
-                      const note = selectedNote._id === ""
+                      const note = selectedNote.id === ""
                         ? await createNote()
                         : await updateNote();
 
@@ -362,18 +293,17 @@ const Notes = () => {
                       await refreshNavBar();
                     }}
                     disabled={
-                      //disable the button if the title is empty
                       selectedNote?.title === "" || selectedNote?.content === ""
                     }
                   >
-                    <img //icon for button
+                    <img
                       src={SaveNoteIcon}
                       alt="Save Icon"
                       className="w-[40px] h-[35px] invert brightness-0"
                     />
                   </button>
 
-                  <button //Delete Button
+                  <button
                     type="button"
                     className={`p-1 rounded-lg cursor-pointer ${
                       !selectedNote.content || !selectedNote.title
@@ -386,7 +316,6 @@ const Notes = () => {
                       await refreshNavBar();
                     }}
                     disabled={
-                      //disable the button if the title is empty
                       selectedNote?.title === "" || selectedNote?.content === ""
                     }
                   >

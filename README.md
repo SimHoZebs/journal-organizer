@@ -4,84 +4,73 @@ A monorepo workspace for the Journal Organizer application.
 
 ## Project Structure
 
-This project is organized as an npm workspace monorepo with the following structure:
+This project is organized as a pnpm workspace monorepo with the following structure:
 
 - `/frontend` - React + TypeScript frontend built with Vite
-- `/backend` - Express.js API server with MongoDB
-- `/flutter` - Flutter mobile application
-- `docker-compose.yml` - MongoDB container configuration
+- `/backend` - Deno-powered Fastify API server with LibSQL/Drizzle ORM
+
+## Changes Since Fork
+
+This project has undergone significant changes from the original repository:
+
+- Migrated from Node.js to Deno runtime environment
+- Switched from Express.js to Fastify for improved performance
+- Completely redesigned database architecture:
+  - Replaced containerized MongoDB with LibSQL (SQLite-compatible database)
+  - Implemented Drizzle ORM for database interactions
+  - Eliminated Docker dependency for database operations
+- Updated to pnpm workspace management from npm workspaces
 
 ## Setup Instructions
 
-1. Install:
-- Node.js
-- npm
-- Docker Desktop
-- Flutter
+1. Install required tools:
+- Deno (latest version)
+- pnpm
 
 2. Clone the Repository
 ```bash
-git clone git@github.com:SimHoZebs/note-organizer.git
-cd note-organizer
+git clone git@github.com:SimHoZebs/journal-organizer.git
+cd journal-organizer
 ```
 
 3. Setup Environment and Install Dependencies
 ```bash
-npm run setup
+pnpm install
 ```
-This will create a `.env` file from the template and install all dependencies. Update the `.env` file with your MongoDB credentials.
 
-> **Note for Windows Users**: The `npm run setup` command does not work properly in PowerShell. Please use Git Bash when working with this project on Windows.
+Create a `.env` file in the root directory with the following variables:
+```
+LIBSQL_URL=your_libsql_url_or_local_file_path
+LIBSQL_AUTH_TOKEN=your_libsql_token_if_using_remote_db
+JWT_SECRET=your_jwt_secret
+SENDGRID_API_KEY=your_sendgrid_api_key
+OPENAI_API_KEY=your_openai_api_key
+```
 
 4. Start the Application
 ```bash
-npm run mongodb  # Start MongoDB container
-npm run dev      # Start both backend and frontend
+pnpm dev      # Start both backend and frontend
 ```
 
 Or run services separately:
 ```bash
-npm run dev:frontend  # Start frontend only
-npm run dev:backend   # Start backend only
-```
-
-5. Stop Services
-```bash
-npm run mongodb:stop  # Stop MongoDB container
+pnpm dev:frontend  # Start frontend only
+pnpm dev:backend   # Start backend only (using Deno)
 ```
 
 ## Available Commands
 
-- `npm run setup` - Setup environment and install all dependencies
-- `npm install` - Install all dependencies
-- `npm run dev` - Start both backend and frontend
-- `npm run dev:backend` - Start backend server only
-- `npm run dev:frontend` - Start frontend dev server only
-- `npm run build` - Build frontend for production
-- `npm run mongodb` - Start MongoDB container
-- `npm run mongodb:stop` - Stop MongoDB container
+- `pnpm install` - Install all dependencies
+- `pnpm dev` - Start both backend and frontend
+- `pnpm dev:backend` - Start Deno backend server
+- `pnpm dev:frontend` - Start frontend dev server
+- `pnpm build` - Build frontend for production
+- `pnpm test` - Run frontend tests
+- `pnpm format` - Format code using Biome
 
-## Flutter Development Setup
+## Mobile Development Setup
 
-1. Install Flutter:
-   - Follow the official [Flutter installation guide](https://docs.flutter.dev/get-started/install) for your operating system
-   - Verify installation with `flutter doctor` and resolve any issues indicated
-
-2. Setup Flutter Project:
-   ```bash
-   cd flutter
-   flutter pub get
-   ```
-
-3. Run the Flutter App:
-   ```bash
-   cd flutter
-   flutter run
-   ```
-
-4. Flutter Development Tools:
-   - Use VS Code with Flutter extension for best development experience
-   - Enable hot reload during development by pressing `r` in the terminal after running the app
+The mobile application is currently under development. More information will be added as it becomes available.
 
 ## Managing Dependencies
 
@@ -93,13 +82,13 @@ To add dependencies to a specific workspace:
 
 ```bash
 # For backend dependencies
-npm install package-name --workspace=backend
+pnpm add package-name --filter backend
 
 # For frontend dependencies
-npm install package-name --workspace=frontend
+pnpm add package-name --filter frontend
 
 # For dev dependencies
-npm install package-name --workspace=frontend --save-dev
+pnpm add -D package-name --filter frontend
 ```
 
 #### Root-level Dependencies
@@ -107,25 +96,38 @@ npm install package-name --workspace=frontend --save-dev
 To add dependencies to the root package.json:
 
 ```bash
-npm install package-name -W
+pnpm add -w package-name
 ```
 
 ### Removing Dependencies
 
 ```bash
 # Remove from specific workspace
-npm uninstall package-name --workspace=backend
+pnpm remove package-name --filter backend
 
 # Remove from root
-npm uninstall package-name -W
+pnpm remove -w package-name
 ```
 
 ### Running Scripts in Specific Workspaces
 
 ```bash
 # Run a script in a specific workspace
-npm run script-name --workspace=frontend
+pnpm --filter frontend run script-name
 
-# Example: Run tests in backend
-npm run test --workspace=backend
+# Example: Run tests in frontend
+pnpm --filter frontend test
 ```
+
+## Technology Stack
+
+- **Runtime Environment**: Deno
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS 4
+- **Backend**: Fastify, Drizzle ORM, LibSQL
+- **Database**: LibSQL (SQLite-compatible, can be used locally or with remote Turso)
+- **Authentication**: JWT, bcrypt, email verification
+- **Email Services**: SendGrid
+- **AI Integration**: OpenAI API
+- **Code Quality**: Biome for formatting and linting
+- **Testing**: Vitest

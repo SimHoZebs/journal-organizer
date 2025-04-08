@@ -160,12 +160,10 @@ export const updateProfile = async (req, res) => {
 
     const updatedProfile = await updateById(profileId, updatedData);
 
-    res
-      .status(200)
-      .json({
-        message: "Profile updated successfully",
-        profile: updatedProfile,
-      });
+    res.status(200).json({
+      message: "Profile updated successfully",
+      profile: updatedProfile,
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

@@ -1,7 +1,7 @@
-const Profile = require("../models/summary");
+import Profile from "../models/summary.js";
 
 // Create profile manually
-exports.createProfile = async (req, res) => {
+export const createProfile = async (req, res) => {
   try {
     const { profileTitle, profileContent, notebookIDs, userId } = req.body;
 
@@ -26,7 +26,7 @@ exports.createProfile = async (req, res) => {
 };
 
 // Update profile manually
-exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   try {
     const { profileId } = req.params;
     const updatedData = req.body;
@@ -44,7 +44,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-exports.deleteProfile = async (req, res) => {
+export const deleteProfile = async (req, res) => {
   try {
     const { profileId } = req.params;
     const deletedProfile = await Profile.findByIdAndDelete(profileId);
@@ -56,7 +56,7 @@ exports.deleteProfile = async (req, res) => {
   }
 };
 
-exports.readProfile = async (req, res) => {
+export const readProfile = async (req, res) => {
   try {
     const { profileId } = req.params;
     const profile = await Profile.findById(profileId);
@@ -67,7 +67,7 @@ exports.readProfile = async (req, res) => {
   }
 };
 
-exports.searchProfiles = async (req, res) => {
+export const searchProfiles = async (req, res) => {
   try {
     const { userId, query } = req.query;
 
@@ -92,7 +92,7 @@ exports.searchProfiles = async (req, res) => {
   }
 };
 
-exports.getProfileById = async (req, res) => {
+export const getProfileById = async (req, res) => {
   try {
     const { userId, profileId } = req.params;
 
@@ -106,7 +106,7 @@ exports.getProfileById = async (req, res) => {
   }
 };
 
-exports.getAllProfiles = async (req, res) => {
+export const getAllProfiles = async (req, res) => {
   try {
     const { userId } = req.params;
     if (!userId)

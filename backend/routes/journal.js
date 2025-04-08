@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import * as notebookController from "../controllers/notebookController.js";
+import authenticateToken from "../middleware/authenticateToken.js";
+
 const router = express.Router();
-const notebookController = require("../controllers/notebookController");
-const authenticateToken = require("../middleware/authenticateToken");
 
 router.post(
   "/create-notebook",
@@ -35,4 +36,4 @@ router.get(
   notebookController.getNotebookById,
 );
 
-module.exports = router;
+export default router;

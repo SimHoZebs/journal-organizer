@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1]; // Bearer <token>
 
   if (!token) {
     return res.status(401).json({ error: "Missing authorization token" });
@@ -18,4 +18,4 @@ function authenticateToken(req, res, next) {
   });
 }
 
-module.exports = authenticateToken;
+export default authenticateToken;

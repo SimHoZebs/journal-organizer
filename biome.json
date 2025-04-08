@@ -12,11 +12,5 @@
   },
   "formatter": {
     "indentStyle": "space"
-  },
-  "linter": {
-    "enabled": false
-  },
-  "organizeImports": {
-    "enabled": false
   }
 }

@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import * as profileController from "../controllers/profileController.js";
+import authenticateToken from "../middleware/authenticateToken.js";
+
 const router = express.Router();
-const profileController = require("../controllers/profileController");
-const authenticateToken = require("../middleware/authenticateToken");
 
 router.post(
   "/create-profile",
@@ -31,4 +32,4 @@ router.get(
   profileController.getProfileById,
 );
 
-module.exports = router;
+export default router;

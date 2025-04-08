@@ -1,7 +1,7 @@
-const OpenAI = require("openai").default;
-const dotenv = require("dotenv");
-const { z } = require("zod");
-const { zodResponseFormat } = require("openai/helpers/zod");
+import { default as OpenAI } from "openai";
+import dotenv from "dotenv";
+import { z } from "zod";
+import { zodResponseFormat } from "openai/helpers/zod";
 
 dotenv.config({ path: "../../.env" });
 
@@ -34,7 +34,7 @@ const ProfileSchema = z.object({
   additionalNotes: z.string().nullable(),
 });
 
-async function extractTags(journalContent) {
+export async function extractTags(journalContent) {
   const messages = [
     {
       role: "system",
@@ -114,7 +114,7 @@ ${combinedNotes}
   ];
 }
 
-async function createProfile(name, notebookContents) {
+export async function createProfile(name, notebookContents) {
   const messages = buildProfilePrompt(name, notebookContents);
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -129,9 +129,3 @@ async function createProfile(name, notebookContents) {
     return null;
   }
 }
-
-module.exports = {
-  extractTags,
-  buildProfilePrompt,
-  createProfile,
-};

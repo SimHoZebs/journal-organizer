@@ -1,6 +1,6 @@
-const Profile = require("../models/summary");
-const Notebook = require("../models/notebook");
-const openaiService = require("./openaiService");
+import Profile from "../models/summary.js";
+import Notebook from "../models/notebook.js";
+import * as openaiService from "./openaiService.js";
 
 function formatProfileContent(data) {
   const formatField = (value) => {
@@ -20,7 +20,7 @@ function formatProfileContent(data) {
 
   const formatQuotes = (arr) =>
     Array.isArray(arr) && arr.filter((v) => v && v !== "null").length > 0
-      ? "- " + arr.filter((v) => v && v !== "null").join("\n- ")
+      ? `- ${arr.filter((v) => v && v !== "null").join("\n- ")}`
       : "N/A";
 
   return `Name: ${formatField(data.name)}
@@ -49,7 +49,7 @@ Memorable Quotes: ${formatQuotes(data.memorableQuotes)}
 Additional Notes: ${formatField(data.additionalNotes)}`;
 }
 
-exports.updateProfilesForNotebook = async (notebook, operation) => {
+export const updateProfilesForNotebook = async (notebook, operation) => {
   if (operation === "create" || operation === "update") {
     const namesArray = await openaiService.extractTags(notebook.content);
     notebook.tags = Array.isArray(namesArray) ? namesArray : [];

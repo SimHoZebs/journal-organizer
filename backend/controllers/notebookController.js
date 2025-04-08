@@ -1,7 +1,8 @@
-const Notebook = require("../models/notebook");
-const profileService = require("../services/profileService");
+import Notebook from "../models/notebook.js";
+import * as profileService from "../services/profileService.js";
+import mongoose from "mongoose";
 
-exports.createNotebook = async (req, res) => {
+export const createNotebook = async (req, res) => {
   try {
     const { title, content, userId } = req.body;
 
@@ -26,7 +27,7 @@ exports.createNotebook = async (req, res) => {
   }
 };
 
-exports.updateNotebook = async (req, res) => {
+export const updateNotebook = async (req, res) => {
   try {
     const { notebookId } = req.params;
     const { title, content } = req.body;
@@ -53,7 +54,7 @@ exports.updateNotebook = async (req, res) => {
   }
 };
 
-exports.deleteNotebook = async (req, res) => {
+export const deleteNotebook = async (req, res) => {
   try {
     const { notebookId } = req.params;
 
@@ -75,7 +76,7 @@ exports.deleteNotebook = async (req, res) => {
   }
 };
 
-exports.readNotebook = async (req, res) => {
+export const readNotebook = async (req, res) => {
   try {
     const { notebookId } = req.params;
     const notebook = await Notebook.findById(notebookId);
@@ -88,7 +89,7 @@ exports.readNotebook = async (req, res) => {
   }
 };
 
-exports.searchNotebooks = async (req, res) => {
+export const searchNotebooks = async (req, res) => {
   try {
     const { userId, query } = req.query;
 
@@ -116,7 +117,7 @@ exports.searchNotebooks = async (req, res) => {
   }
 };
 
-exports.getNotebookById = async (req, res) => {
+export const getNotebookById = async (req, res) => {
   try {
     const { userId, notebookId } = req.params;
 
@@ -144,7 +145,7 @@ exports.getNotebookById = async (req, res) => {
 };
 
 // GET /notebook/all/:userId
-exports.getAllNotebooks = async (req, res) => {
+export const getAllNotebooks = async (req, res) => {
   try {
     const { userId } = req.params;
 

@@ -1,4 +1,4 @@
-module.exports = (resetLink) => {
+const resetPasswordEmailTemplate = (resetLink) => {
   return `
 <!DOCTYPE html>
 <html>
@@ -85,3 +85,5 @@ module.exports = (resetLink) => {
 </html>
   `;
 };
+
+export default resetPasswordEmailTemplate;

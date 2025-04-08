@@ -1,4 +1,4 @@
-module.exports = (verificationLink) => {
+const verificationEmailTemplate = (verificationLink) => {
   return `
 <!DOCTYPE html>
 <html>
@@ -81,3 +81,5 @@ module.exports = (verificationLink) => {
 </html>
   `;
 };
+
+export default verificationEmailTemplate;

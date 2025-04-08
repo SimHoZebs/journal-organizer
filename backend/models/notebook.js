@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // Define the Notebook schema
 const notebookSchema = new mongoose.Schema({
@@ -29,4 +29,5 @@ const notebookSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Notebook", notebookSchema);
+const Notebook = mongoose.model("Notebook", notebookSchema);
+export default Notebook;

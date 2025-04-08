@@ -1,17 +1,17 @@
-const User = require("../models/user");
-const jwt = require("jsonwebtoken");
-const crypto = require("node:crypto");
-const sendEmail = require("../services/sendEmail");
-const verificationEmailTemplate = require("../services/emailTemplates/verificationEmail");
-const resetPasswordEmailTemplate = require("../services/emailTemplates/resetPasswordEmail");
+import User from "../models/user.js";
+import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
+import sendEmail from "../services/sendEmail.js";
+import verificationEmailTemplate from "../services/emailTemplates/verificationEmail.js";
+import resetPasswordEmailTemplate from "../services/emailTemplates/resetPasswordEmail.js";
 
 // Register a new user
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
     // Check if a user with the same email or username already exists
-    let existingUser = await User.findOne({
+    const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
     if (existingUser) {
@@ -57,7 +57,7 @@ exports.register = async (req, res) => {
 };
 
 // Login user
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, username, password } = req.body;
 
@@ -98,7 +98,7 @@ exports.login = async (req, res) => {
 };
 
 // Forgot Password – generate a reset token
-exports.forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -133,7 +133,7 @@ exports.forgotPassword = async (req, res) => {
 };
 
 // Reset Password – update the password using the reset token
-exports.resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword, confirmPassword } = req.body;
     if (newPassword !== confirmPassword) {
@@ -163,7 +163,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 // Verify Email – mark the user's email as verified using a token
-exports.verifyEmail = async (req, res) => {
+export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;
     // Verify token (assuming the verification token is a JWT containing the user ID)

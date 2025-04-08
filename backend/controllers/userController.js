@@ -1,7 +1,7 @@
-const User = require("../models/user");
+import User from "../models/user.js";
 
 // Create a new user
-exports.createUser = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
     const { username, email, password, firstName, lastName } = req.body;
 
@@ -25,7 +25,7 @@ exports.createUser = async (req, res) => {
     const savedUser = await newUser.save();
     // Exclude password from response
     const userResponse = savedUser.toObject();
-    delete userResponse.password;
+    userResponse.password = undefined;
     res
       .status(201)
       .json({ message: "User created successfully", user: userResponse });
@@ -35,7 +35,7 @@ exports.createUser = async (req, res) => {
 };
 
 // Get all users
-exports.getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
@@ -45,7 +45,7 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // Get a user by ID
-exports.getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -56,7 +56,7 @@ exports.getUserById = async (req, res) => {
 };
 
 // Update a user by ID
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
     const updateData = req.body;
     // Find the user
@@ -83,7 +83,7 @@ exports.updateUser = async (req, res) => {
 
     const savedUser = await user.save();
     const userResponse = savedUser.toObject();
-    delete userResponse.password;
+    userResponse.password = undefined;
     res.json({ message: "User updated successfully", user: userResponse });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -91,7 +91,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Delete a user by ID
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     if (!deletedUser) return res.status(404).json({ error: "User not found" });
@@ -102,7 +102,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 // Get user ID by username
-exports.getUserIdByUsername = async (req, res) => {
+export const getUserIdByUsername = async (req, res) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username });

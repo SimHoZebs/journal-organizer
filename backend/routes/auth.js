@@ -1,6 +1,7 @@
-const express = require("express");
+import express from "express";
+import * as authController from "../controllers/authController.js";
+
 const router = express.Router();
-const authController = require("../controllers/authController");
 
 // POST /auth/register – Register a new user
 router.post("/register", authController.register);
@@ -17,4 +18,4 @@ router.post("/reset-password", authController.resetPassword);
 // GET /auth/verify-email – Verify a user's email with a token (sent via email)
 router.get("/verify-email", authController.verifyEmail);
 
-module.exports = router;
+export default router;

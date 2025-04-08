@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Journal organizer application",
-  "workspaces": [
+  "workspace": [
     "frontend",
     "backend"
   ],
@@ -20,14 +20,13 @@
     "build:flutter": "cd flutter && flutter build apk",
     "flutter:clean": "cd flutter && flutter clean",
     "flutter:test": "cd flutter && flutter test",
-    "format": "biome format . --write",
+    "format": "deno fmt .",
     "test": "npm run test --workspace=frontend"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
     "concurrently": "^9.1.2",
     "typescript": "^5.8.3"
   }

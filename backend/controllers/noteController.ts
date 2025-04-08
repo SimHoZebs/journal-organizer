@@ -20,9 +20,7 @@ export async function findById(id) {
 
 // Find all notes
 export async function findAll() {
-  const result = await drizzleDb
-    .select()
-    .from(notes);
+  const result = await drizzleDb.select().from(notes);
   // Parse tags for each note
   return result.map((note) => {
     return {
@@ -204,10 +202,7 @@ export const searchNotes = async (req, res) => {
       .select({ id: notes.id, title: notes.title })
       .from(notes)
       .where(
-        or(
-          like(notes.title, `%${query}%`),
-          like(notes.content, `%${query}%`),
-        ),
+        or(like(notes.title, `%${query}%`), like(notes.content, `%${query}%`)),
       );
 
     res.status(200).json({

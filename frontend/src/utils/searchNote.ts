@@ -1,9 +1,9 @@
 const searchNote = async (query: string) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/note/search?query=${
-        encodeURIComponent(query)
-      }`,
+      `${import.meta.env.VITE_API_URL}/api/note/search?query=${encodeURIComponent(
+        query,
+      )}`,
       {
         method: "GET",
         headers: {

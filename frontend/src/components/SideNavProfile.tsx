@@ -7,14 +7,12 @@ import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 type Props = {
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedRelationship: React.Dispatch<
-    React.SetStateAction<
-      {
-        [key: string]: unknown;
-        profileTitle: string;
-        id: string;
-        profileContent: string[];
-      } | null
-    >
+    React.SetStateAction<{
+      [key: string]: unknown;
+      profileTitle: string;
+      id: string;
+      profileContent: string[];
+    } | null>
   >; // Function to set the selected relationship
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
 };
@@ -38,9 +36,9 @@ const SideNav: React.FC<Props> = ({
   const searchProfiles = async (query: string) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/profile/search?query=${
-          encodeURIComponent(query)
-        }`,
+        `${import.meta.env.VITE_API_URL}/api/profile/search?query=${encodeURIComponent(
+          query,
+        )}`,
         {
           method: "GET",
           headers: {

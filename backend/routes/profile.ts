@@ -1,6 +1,6 @@
 import express from "express";
 import * as profileController from "../controllers/profileController.js";
-import authenticateToken from "../middleware/authenticateToken.js";
+import authenticateToken from "../services/authenticateToken.js";
 
 const router = express.Router();
 

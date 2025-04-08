@@ -1,1 +1,43 @@
-{ "workspace": ["frontend", "backend"] }
+{
+  "workspace": ["frontend", "backend"],
+  "tasks": {
+    "dev:frontend": "cd frontend && deno run npm:vite",
+    "dev:backend": "cd backend && deno run --watch server.ts",
+    "dev": "deno task dev:backend & deno task dev:frontend",
+    "format": "deno fmt .",
+    "lint": "deno lint .",
+    "test": "cd frontend && deno test",
+
+    "build": "cd frontend && deno run npm:tsc -b && deno run npm:vite build",
+    "preview": "cd frontend && deno run npm:vite preview",
+    "test:frontend": "cd frontend && deno test",
+    "test:frontend:watch": "cd frontend && deno test --watch",
+
+    "test:backend": "cd backend && deno test",
+    "start:backend": "cd backend && deno run server.ts"
+  },
+  "permissions": {
+    "env": true,
+    "net": true,
+    "read": true,
+    "write": true
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "strict": true,
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "ES2023"],
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "imports": {
+    "react": "npm:react",
+    "react-dom": "npm:react-dom",
+    "react/jsx-runtime": "npm:react/jsx-runtime",
+    "vite": "npm:vite"
+  }
+}

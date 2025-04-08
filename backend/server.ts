@@ -5,8 +5,8 @@ import authRoutes from "./routes/auth.ts";
 import noteRoutes from "./routes/note.ts";
 import profileRoutes from "./routes/profile.ts";
 import userRoutes from "./routes/users.ts";
-import process from "node:process";
 
+// Load environment variables
 dotenv.config({ path: "../.env" });
 
 const fastify = Fastify({
@@ -24,11 +24,11 @@ fastify.get("/api/test", (_, reply) => {
   reply.send({ message: "Hello from the API!" });
 });
 
-const PORT = Number.parseInt(process.env.PORT || "") || 3000;
+const PORT = Number.parseInt(Deno.env.get("PORT") || "") || 3000;
 fastify.listen({ port: PORT }, (err) => {
   if (err) {
     fastify.log.error(err);
-    process.exit(1);
+    Deno.exit(1);
   }
   console.log(`Server running on port ${PORT}`);
 });

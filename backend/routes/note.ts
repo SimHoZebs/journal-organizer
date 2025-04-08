@@ -1,20 +1,24 @@
-import express from "express";
+import type { FastifyInstance, FastifyPluginOptions } from "fastify";
 import {
   createNote,
   deleteNote,
   getAllNotes,
+  getNoteById,
+  readNote,
+  searchNotes,
   updateNote,
-} from "../controllers/noteController.js";
-import authenticateToken from "../middleware/authenticateToken.js";
+} from "../controllers/noteController";
 
-const router = express.Router();
-
-router.post("/create-note", authenticateToken, createNote);
-router.put("/update-note/:noteId", authenticateToken, updateNote);
-router.delete("/delete-note/:noteId", authenticateToken, deleteNote);
-router.get("/read-note/:noteId", authenticateToken, readNote);
-router.get("/search", authenticateToken, searchNotes);
-router.get("/all/:userId", authenticateToken, getAllNotes);
-router.get("/:userId/:noteId", authenticateToken, getNoteById);
-
-export default router;
+export default async function (
+  fastify: FastifyInstance,
+  options: FastifyPluginOptions,
+) {
+  // Register the authenticate hook for all routes
+  fastify.post("/create-note", createNote);
+  fastify.put("/update-note/:noteId", updateNote);
+  fastify.delete("/delete-note/:noteId", deleteNote);
+  fastify.get("/read-note/:noteId", readNote);
+  fastify.get("/search", searchNotes);
+  fastify.get("/all/:userId", getAllNotes);
+  fastify.get("/:userId/:noteId", getNoteById);
+}

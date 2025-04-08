@@ -1,35 +1,43 @@
-import express from "express";
-import * as profileController from "../controllers/profileController.js";
-import authenticateToken from "../services/authenticateToken.js";
+import type { FastifyInstance, FastifyPluginOptions } from "fastify";
+import * as profileController from "../controllers/profileController";
+import authenticateToken from "../services/authenticateToken";
 
-const router = express.Router();
+export default async function (
+  fastify: FastifyInstance,
+  options: FastifyPluginOptions,
+) {
+  // Public routes that don't require authentication
+  fastify.get("/search", profileController.searchProfiles);
 
-router.post(
-  "/create-profile",
-  authenticateToken,
-  profileController.createProfile,
-);
-router.delete(
-  "/delete-profile/:profileId",
-  authenticateToken,
-  profileController.deleteProfile,
-);
-router.put(
-  "/update-profile/:profileId",
-  authenticateToken,
-  profileController.updateProfile,
-);
-router.get(
-  "/read-profile/:profileId",
-  authenticateToken,
-  profileController.readProfile,
-);
-router.get("/search", authenticateToken, profileController.searchProfiles);
-router.get("/all/:userId", authenticateToken, profileController.getAllProfiles);
-router.get(
-  "/:userId/:profileId",
-  authenticateToken,
-  profileController.getProfileById,
-);
-
-export default router;
+  // Routes that require authentication
+  fastify.post(
+    "/create-profile",
+    { preHandler: authenticateToken },
+    profileController.createProfile,
+  );
+  fastify.delete(
+    "/delete-profile/:profileId",
+    { preHandler: authenticateToken },
+    profileController.deleteProfile,
+  );
+  fastify.put(
+    "/update-profile/:profileId",
+    { preHandler: authenticateToken },
+    profileController.updateProfile,
+  );
+  fastify.get(
+    "/read-profile/:profileId",
+    { preHandler: authenticateToken },
+    profileController.readProfile,
+  );
+  fastify.get(
+    "/all/:userId",
+    { preHandler: authenticateToken },
+    profileController.getAllProfiles,
+  );
+  fastify.get(
+    "/:userId/:profileId",
+    { preHandler: authenticateToken },
+    profileController.getProfileById,
+  );
+}

@@ -1,24 +1,25 @@
-import express from "express";
-import * as userController from "../controllers/userController.js";
+import type { FastifyInstance, FastifyPluginOptions } from "fastify";
+import * as userController from "../controllers/userController";
+import authenticateToken from "../services/authenticateToken";
 
-const router = express.Router();
-
-// Create a new user
-router.post("/", userController.createUser);
-
-// Get all users
-router.get("/", userController.getAllUsers);
-
-// Get user ID by username (specific route must come before generic /:id route)
-router.get("/id/:username", userController.getUserIdByUsername);
-
-// Get a user by ID
-router.get("/:id", userController.getUserById);
-
-// Update a user by ID
-router.put("/:id", userController.updateUser);
-
-// Delete a user by ID
-router.delete("/:id", userController.deleteUser);
-
-export default router;
+export default async function (
+  fastify: FastifyInstance,
+  options: FastifyPluginOptions,
+) {
+  // Routes that require authentication
+  fastify.get(
+    "/:id",
+    { preHandler: authenticateToken },
+    userController.getUserById,
+  );
+  fastify.put(
+    "/:id",
+    { preHandler: authenticateToken },
+    userController.updateUser,
+  );
+  fastify.delete(
+    "/:id",
+    { preHandler: authenticateToken },
+    userController.deleteUser,
+  );
+}

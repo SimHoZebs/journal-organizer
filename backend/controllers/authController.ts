@@ -2,12 +2,13 @@ import crypto from "node:crypto";
 import bcrypt from "bcrypt";
 import { and, eq, gt } from "drizzle-orm";
 import jwt from "jsonwebtoken";
-import { drizzleDb } from "../database/db.js";
-import { users } from "../database/schema.js";
-import resetPasswordEmailTemplate from "../services/emailTemplates/resetPasswordEmail.js";
-import verificationEmailTemplate from "../services/emailTemplates/verificationEmail.js";
-import sendEmail from "../services/sendEmail.js";
-import * as User from "./userController.js";
+import { drizzleDb } from "../database/db.ts";
+import { users } from "../database/schema.ts";
+import resetPasswordEmailTemplate from "../services/emailTemplates/resetPasswordEmail.ts";
+import verificationEmailTemplate from "../services/emailTemplates/verificationEmail.ts";
+import sendEmail from "../services/sendEmail.ts";
+import * as User from "./userController.ts";
+import process from "node:process";
 
 // Register a new user
 export const register = async (req, res) => {

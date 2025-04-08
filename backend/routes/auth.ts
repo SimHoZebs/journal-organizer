@@ -1,24 +1,21 @@
 import type { FastifyInstance, FastifyPluginOptions } from "fastify";
-import * as authController from "../controllers/authController";
 import authenticateToken from "../services/authenticateToken";
+import {
+  login,
+  register,
+  logout,
+  validate,
+} from "../controllers/authController";
 
 export default async function (
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
   // Public routes that don't require authentication
-  fastify.post("/login", authController.login);
-  fastify.post("/register", authController.register);
+  fastify.post("/login", login);
+  fastify.post("/register", register);
 
   // Routes that require authentication
-  fastify.post(
-    "/logout",
-    { preHandler: authenticateToken },
-    authController.logout,
-  );
-  fastify.get(
-    "/validate",
-    { preHandler: authenticateToken },
-    authController.validate,
-  );
+  fastify.post("/logout", { preHandler: authenticateToken }, logout);
+  fastify.get("/validate", { preHandler: authenticateToken }, validate);
 }

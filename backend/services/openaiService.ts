@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { default as OpenAI } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
+import process from "node:process";
 
 dotenv.config({ path: "../../.env" });
 

@@ -1,10 +1,11 @@
 import cors from "@fastify/cors";
 import dotenv from "dotenv";
 import Fastify from "fastify";
-import authRoutes from "./routes/auth";
-import noteRoutes from "./routes/note";
-import profileRoutes from "./routes/profile";
-import userRoutes from "./routes/users";
+import authRoutes from "./routes/auth.ts";
+import noteRoutes from "./routes/note.ts";
+import profileRoutes from "./routes/profile.ts";
+import userRoutes from "./routes/users.ts";
+import process from "node:process";
 
 dotenv.config({ path: "../.env" });
 

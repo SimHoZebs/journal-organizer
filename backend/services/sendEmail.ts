@@ -1,4 +1,5 @@
 import sgMail from "@sendgrid/mail";
+import process from "node:process";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendEmail = async (to, subject, content) => {

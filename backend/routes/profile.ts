@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyPluginOptions } from "fastify";
-import * as profileController from "../controllers/profileController";
-import authenticateToken from "../services/authenticateToken";
+import * as profileController from "../controllers/profileController.ts";
+import authenticateToken from "../services/authenticateToken.ts";
 
 export default async function (
   fastify: FastifyInstance,

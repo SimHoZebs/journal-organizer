@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/libsql";
 
 import { createClient } from "@libsql/client";
 import dotenv from "dotenv";
+import process from "node:process";
 
 dotenv.config({ path: "../.env" });
 

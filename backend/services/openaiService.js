@@ -1,7 +1,7 @@
-import { default as OpenAI } from "openai";
 import dotenv from "dotenv";
-import { z } from "zod";
+import { default as OpenAI } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
 
 dotenv.config({ path: "../../.env" });
 

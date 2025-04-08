@@ -1,9 +1,9 @@
-import User from "../models/user.js";
-import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
-import sendEmail from "../services/sendEmail.js";
-import verificationEmailTemplate from "../services/emailTemplates/verificationEmail.js";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
 import resetPasswordEmailTemplate from "../services/emailTemplates/resetPasswordEmail.js";
+import verificationEmailTemplate from "../services/emailTemplates/verificationEmail.js";
+import sendEmail from "../services/sendEmail.js";
 
 // Register a new user
 export const register = async (req, res) => {

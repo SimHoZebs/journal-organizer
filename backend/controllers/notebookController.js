@@ -1,6 +1,6 @@
+import mongoose from "mongoose";
 import Notebook from "../models/notebook.js";
 import * as profileService from "../services/profileService.js";
-import mongoose from "mongoose";
 
 export const createNotebook = async (req, res) => {
   try {

@@ -7,7 +7,8 @@
       ".env",
       "package-lock.json",
       "package.json",
-      "data/**/*"
+      "data/**/*",
+      "dist/**/*"
     ]
   },
   "formatter": {

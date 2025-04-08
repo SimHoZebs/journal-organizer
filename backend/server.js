@@ -1,3 +1,4 @@
+import cors from "cors";
 // server.js
 import dotenv from "dotenv";
 import express from "express";
@@ -6,7 +7,6 @@ import authRoutes from "./routes/auth.js"; // Note the .js extension
 import journalRoutes from "./routes/journal.js";
 import profileRoutes from "./routes/profile.js";
 import userRoutes from "./routes/users.js";
-import cors from "cors";
 
 dotenv.config({ path: "../.env" });
 

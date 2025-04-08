@@ -1,14 +1,14 @@
-import SideNav from "../components/SideNavNote"; //import the SideNav component
+import MDEditor, { type PreviewType } from "@uiw/react-md-editor";
 import { useEffect, useState } from "react"; //import some hooks
-import MDEditor, { PreviewType } from "@uiw/react-md-editor";
 import { useNavigate } from "react-router";
+import SideNav from "../components/SideNavNote"; //import the SideNav component
 
 //icons
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
-import SaveNoteIcon from "../assets/icons/save-note-icon.svg";
 import DeleteNoteIcon from "../assets/icons/delete-note-icon.svg";
-import searchJournal from "../utils/searchJournal";
+import SaveNoteIcon from "../assets/icons/save-note-icon.svg";
 import handleLogout from "../utils/handleLogout";
+import searchJournal from "../utils/searchJournal";
 
 const Notes = () => {
   const [displayList, setDisplayList] = useState<
@@ -206,7 +206,7 @@ const Notes = () => {
       return data.notebook;
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while saving the note. Error: " + error);
+      alert(`An error occurred while saving the note. Error: ${error}`);
     }
   }; //END OF HANDLE UPDATE--------------------------------------------------------------------------
 
@@ -394,7 +394,7 @@ const Notes = () => {
             </div>
           </div>
         ) : (
-          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center"></div>
+          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center" />
         )}
       </div>
     </div>

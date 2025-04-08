@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-import Notes from "./pages/Notes";
-import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import Relationships from "./pages/Relationships";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import EmailVerify from "./pages/EmailVerify";
 import ForgotPassword from "./pages/ForgotPwd";
+import Login from "./pages/Login";
+import Notes from "./pages/Notes";
+import Relationships from "./pages/Relationships";
 import ResetPassword from "./pages/ResetPassword";
+import SignUp from "./pages/SignUp";
 
 function App() {
   return (

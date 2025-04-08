@@ -1,9 +1,9 @@
-import SideNav from "../components/SideNavProfile";
 import { useEffect, useState } from "react";
-import closeSideNav from "../assets/icons/close-nav-icon.svg";
-import ghostIcon from "../assets/icons/ghost-icon.svg";
 import { useNavigate } from "react-router";
 import closeErrorDialog from "../assets/icons/Xmark.svg";
+import closeSideNav from "../assets/icons/close-nav-icon.svg";
+import ghostIcon from "../assets/icons/ghost-icon.svg";
+import SideNav from "../components/SideNavProfile";
 
 const Relationships = () => {
   const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);

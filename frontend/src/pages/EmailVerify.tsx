@@ -1,6 +1,6 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import Navbar from "../components/Navbar";
-import { useState, useEffect } from "react";
 
 const EmailVerify = () => {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ const EmailVerify = () => {
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage("An unexpected error occurred: " + String(error)); // Or log the error type
+        setErrorMessage(`An unexpected error occurred: ${String(error)}`); // Or log the error type
       }
     }
   };

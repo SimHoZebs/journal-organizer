@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
-import notesPage from "../assets/icons/notes-page-icon.svg";
-import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 import contactIcon from "../assets/icons/contact-icon.svg";
 import logoutIcon from "../assets/icons/logout-icon.svg";
+import notesPage from "../assets/icons/notes-page-icon.svg";
+import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 
 type Props = {
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
@@ -182,7 +182,7 @@ const SideNav: React.FC<Props> = ({
             closeNav(false);
           }
         }}
-      ></div>
+      />
       <div className="shrink-0 border-r border-neutral-50 z-20 absolute top-0 left-0 w-[300px] h-dvh overflow-hidden flex flex-col bg-neutral-800 sm:static">
         {/* Top Nav */}
         <div className="flex items-center justify-between py-2 pl-2 pr-2.5 border-b border-neutral-50">

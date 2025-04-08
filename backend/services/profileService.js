@@ -1,5 +1,5 @@
-import Profile from "../models/summary.js";
 import Notebook from "../models/notebook.js";
+import Profile from "../models/summary.js";
 import * as openaiService from "./openaiService.js";
 
 function formatProfileContent(data) {

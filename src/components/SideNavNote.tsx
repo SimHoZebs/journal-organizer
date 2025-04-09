@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router";
 import addNoteIcon from "../assets/icons/add-new-note-icon.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";

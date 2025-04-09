@@ -1,11 +1,9 @@
 import cors from "@fastify/cors";
-import dotenv from "dotenv";
 import Fastify from "fastify";
 import noteRoutes from "./routes/note.ts";
 import profileRoutes from "./routes/profile.ts";
 
-// Load environment variables
-dotenv.config({ path: "../.env" });
+// No need for dotenv in Deno - it has built-in env support
 
 const fastify = Fastify({
   logger: true,
@@ -20,7 +18,7 @@ fastify.get("/api/test", (_, reply) => {
   reply.send({ message: "Hello from the API!" });
 });
 
-const PORT = Number.parseInt(Deno.env.get("PORT") || "") || 3000;
+const PORT = Number(Deno.env.get("PORT")) || 3000;
 fastify.listen({ port: PORT }, (err) => {
   if (err) {
     fastify.log.error(err);

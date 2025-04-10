@@ -1,110 +1,86 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import addNoteIcon from "../assets/icons/add-new-note-icon.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
-import notesPage from "../assets/icons/notes-page-icon.svg";
-import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
-import searchNote from "../utils/searchNote";
 
-type BaseItem = {
+// Generic item type that all displayed items must conform to
+type Item = {
   id: string;
   [key: string]: unknown;
 };
 
-type NoteItem = BaseItem & {
-  title: string;
+// Navigation link configuration
+type NavLink = {
+  to: string;
+  icon: string;
+  altText: string;
+  isActive: boolean;
 };
 
-type ProfileItem = BaseItem & {
-  profileTitle: string;
-  profileContent?: string;
-};
-
-type SideNavProps = {
-  type: "notes" | "relationships";
+type Props<T extends Item> = {
+  // Generic props
+  title?: string;
+  placeholder?: string;
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
-  createNewItem?: () => void; // Optional function for creating new notes
+  onItemSelect: (id: string) => void;
+  
+  // Item display props
+  items?: T[];
+  setItems?: React.Dispatch<React.SetStateAction<T[]>>;
+  getDisplayName: (item: T) => string;
+  
+  // Optional actions
+  createNewItem?: () => void;
+  onSearch?: (query: string) => Promise<void>;
   setErrorMessage?: React.Dispatch<React.SetStateAction<string>>;
-  onItemSelect: (id: string) => void; // Generic function for selecting an item
-  externalDisplayList?: NoteItem[] | ProfileItem[]; // Optional external list to display
-  setExternalDisplayList?: React.Dispatch<React.SetStateAction<NoteItem[] | ProfileItem[]>>;
+  
+  // Navigation
+  navLinks: NavLink[];
+  addButtonIcon?: string;
 };
 
-const SideNav: React.FC<SideNavProps> = ({
-  type,
-  closeNav,
-  createNewItem,
-  onItemSelect,
-  setErrorMessage,
-  externalDisplayList,
-  setExternalDisplayList,
-}) => {
-  const [search, setSearch] = useState<string>(""); // Search Input
-  const [displayList, setDisplayList] = useState<(NoteItem | ProfileItem)[]>(
-    externalDisplayList || []
-  ); // List of items to display
-  const [selectedId, setSelectedId] = useState<string | null>(null); // Store ID of selected item
-  const navModal = useRef<HTMLDivElement>(null); // Nav Black Part
+const SideNav = <T extends Item>(props: Props<T>) => {
+  const {
+    title,
+    placeholder = "Search...",
+    items = [],
+    closeNav,
+    onItemSelect,
+    getDisplayName,
+    createNewItem,
+    onSearch,
+    navLinks,
+    addButtonIcon,
+  } = props;
 
-  // Handle search based on type
+  const [search, setSearch] = useState<string>("");
+  const [displayList, setDisplayList] = useState<T[]>(items);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const navModal = useRef<HTMLDivElement>(null);
+
+  // Generic search handler
   const handleSearch = async (query: string) => {
-    if (type === "notes" && setExternalDisplayList) {
-      // For notes, use the searchNote utility
+    if (onSearch) {
       try {
-        const results = await searchNote(query);
-        setExternalDisplayList(results || []);
+        await onSearch(query);
       } catch (error) {
-        console.error("Error searching notes:", error);
-        if (setErrorMessage) {
-          setErrorMessage("Failed to search notes");
-        }
-      }
-    } else if (type === "relationships") {
-      // For relationships, use the API endpoint
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/profile/search?query=${
-            encodeURIComponent(query)
-          }`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorMessage = await response.json();
-          throw new Error(
-            errorMessage.error || "Unexpected error while searching for profiles"
-          );
-        }
-
-        const responseData = await response.json();
-        console.log(responseData.message);
-        setDisplayList(responseData.profiles);
-      } catch (error) {
-        if (setErrorMessage) {
-          setErrorMessage(
+        console.error("Error searching:", error);
+        if (props.setErrorMessage) {
+          props.setErrorMessage(
             error instanceof Error
-              ? `Failed to search profiles: ${error.message}`
-              : "An error occurred while searching profiles"
+              ? `Search failed: ${error.message}`
+              : "An error occurred while searching"
           );
         }
-        console.error(error);
       }
     }
   };
 
-  // Load initial data
+  // Update display list when items change
   useEffect(() => {
-    if (externalDisplayList) {
-      setDisplayList(externalDisplayList);
-    } else {
-      handleSearch("");
+    if (items) {
+      setDisplayList(items);
     }
-  }, [externalDisplayList, type]);
+  }, [items]);
 
   // Item selection handling
   const handleItemSelect = (id: string) => {
@@ -113,16 +89,6 @@ const SideNav: React.FC<SideNavProps> = ({
     if (window.innerWidth < 640) {
       closeNav(false);
     }
-  };
-
-  // Get display name for an item based on type
-  const getItemDisplayName = (item: NoteItem | ProfileItem): string => {
-    if (type === "notes" && "title" in item) {
-      return item.title;
-    } else if (type === "relationships" && "profileTitle" in item) {
-      return item.profileTitle;
-    }
-    return "Untitled";
   };
 
   return (
@@ -154,7 +120,7 @@ const SideNav: React.FC<SideNavProps> = ({
 
           {/* Page Navigation */}
           <div className="flex items-center justify-between gap-3">
-            {type === "notes" && createNewItem && (
+            {createNewItem && addButtonIcon && (
               <button
                 type="button"
                 className="p-1.5 rounded-lg cursor-pointer hover:bg-neutral-600"
@@ -162,44 +128,40 @@ const SideNav: React.FC<SideNavProps> = ({
               >
                 <img
                   className="w-[25px] h-[25px]"
-                  src={addNoteIcon}
-                  alt="Add New Note Icon"
+                  src={addButtonIcon}
+                  alt="Add New Item"
                 />
               </button>
             )}
-            <Link to="/notes">
-              <button
-                type="button"
-                className={`p-1.5 rounded-lg cursor-pointer ${
-                  type === "notes" ? "bg-neutral-500" : "hover:bg-neutral-600"
-                }`}
-              >
-                <img
-                  className="w-[25px] h-[25px] invert brightness-0"
-                  src={notesPage}
-                  alt="Notes Page Icon"
-                />
-              </button>
-            </Link>
-            <Link to="/relationships">
-              <button
-                type="button"
-                className={`p-1.5 rounded-lg cursor-pointer ${
-                  type === "relationships" ? "bg-neutral-500" : "hover:bg-neutral-600"
-                }`}
-              >
-                <img
-                  className="w-[25px] h-[25px] invert brightness-0"
-                  src={relationshipIcon}
-                  alt="People Relationships Icon"
-                />
-              </button>
-            </Link>
+            
+            {/* Nav Links */}
+            {navLinks.map((link, index) => (
+              <Link key={index} to={link.to}>
+                <button
+                  type="button"
+                  className={`p-1.5 rounded-lg cursor-pointer ${
+                    link.isActive
+                      ? "bg-neutral-500"
+                      : "hover:bg-neutral-600"
+                  }`}
+                >
+                  <img
+                    className="w-[25px] h-[25px] invert brightness-0"
+                    src={link.icon}
+                    alt={link.altText}
+                  />
+                </button>
+              </Link>
+            ))}
           </div>
         </div>
 
         {/* Search and Display List */}
         <div className="grow flex flex-col pt-4 pb-3.5 gap-3.5 overflow-hidden">
+          {title && (
+            <h2 className="text-neutral-50 font-medium text-lg px-5">{title}</h2>
+          )}
+          
           {/* Search Bar */}
           <input
             className="px-2.5 py-1 rounded-lg border-[0.5px] border-neutral-50 mx-5 text-neutral-50"
@@ -208,7 +170,7 @@ const SideNav: React.FC<SideNavProps> = ({
               setSearch(event.target.value);
               handleSearch(event.target.value);
             }}
-            placeholder={type === "notes" ? "Search Note" : "Search Profile"}
+            placeholder={placeholder}
           />
 
           {/* Display List */}
@@ -224,7 +186,7 @@ const SideNav: React.FC<SideNavProps> = ({
                 }`}
                 onClick={() => handleItemSelect(item.id)}
               >
-                {getItemDisplayName(item)}
+                {getDisplayName(item)}
               </button>
             ))}
           </div>

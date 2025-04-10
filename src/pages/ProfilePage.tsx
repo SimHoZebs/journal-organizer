@@ -2,27 +2,122 @@ import { useState } from "react";
 import closeErrorDialog from "../assets/icons/Xmark.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import ghostIcon from "../assets/icons/ghost-icon.svg";
-import SideNav from "../components/SideNav";
+import notesPage from "../assets/icons/notes-page-icon.svg";
+import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
+import SideNav from "../components/SideNav.tsx";
 
-const Profiles = () => {
+type ProfileItem = {
+  id: string;
+  profileTitle: string;
+  profileContent: string[];
+  [key: string]: unknown;
+};
+
+const ProfilePage = () => {
   const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
-  const [selectedRelationship, setSelectedRelationship] = useState<
-    {
-      profileTitle: string;
-      id: string;
-      profileContent: string[];
-      [key: string]: unknown;
-    } | null
-  >(null);
+  const [profilesList, setProfilesList] = useState<ProfileItem[]>([]);
+  const [selectedRelationship, setSelectedRelationship] = useState<ProfileItem | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Handle selecting a profile
+  const handleSelectProfile = async (id: string) => {
+    try {
+      // Find the selected profile in the list or fetch it from API
+      const profile = profilesList.find(profile => profile.id === id);
+      
+      if (profile) {
+        setSelectedRelationship(profile);
+      } else {
+        // If not found in the list, fetch it from the API
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/profile/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile");
+        }
+
+        const data = await response.json();
+        setSelectedRelationship(data.profile);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMessage("An error occurred while fetching the profile.");
+    }
+  };
+
+  // Handle search functionality
+  const handleSearch = async (query: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/profile/search?query=${
+          encodeURIComponent(query)
+        }`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        throw new Error(
+          errorMessage.error ||
+            "Unexpected error while searching for profiles"
+        );
+      }
+
+      const responseData = await response.json();
+      console.log(responseData.message);
+      setProfilesList(responseData.profiles);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? `Failed to search profiles: ${error.message}`
+          : "An error occurred while searching profiles"
+      );
+      console.error(error);
+    }
+  };
+
+  // Navigation links for SideNav
+  const navLinks = [
+    {
+      to: "/notes",
+      icon: notesPage,
+      altText: "Notes Page Icon",
+      isActive: false
+    },
+    {
+      to: "/relationships",
+      icon: relationshipIcon,
+      altText: "People Relationships Icon",
+      isActive: true
+    }
+  ];
 
   return (
     <div className="flex h-dvh overflow-hidden relative">
       {sideNavOpen && (
-        <SideNav
+        <SideNav<ProfileItem>
+          title="Relationships"
+          placeholder="Search Profile"
+          items={profilesList}
+          setItems={setProfilesList}
+          onSearch={handleSearch}
+          onItemSelect={handleSelectProfile}
           closeNav={setSideNavOpen}
-          setSelectedRelationship={setSelectedRelationship}
           setErrorMessage={setErrorMessage}
+          navLinks={navLinks}
+          getDisplayName={(item) => item.profileTitle}
         />
       )}
 
@@ -30,7 +125,7 @@ const Profiles = () => {
         <div className="z-50 absolute bottom-4 right-4 bg-amber-700 px-5 py-2 rounded-lg flex items-center justify-between gap-4">
           <span className="text-neutral-50">{errorMessage}</span>
           <button
-            className=" hover:bg-amber-500 rounded-md cursor-pointer p-1"
+            className="hover:bg-amber-500 rounded-md cursor-pointer p-1"
             onClick={() => setErrorMessage("")}
           >
             <img
@@ -108,4 +203,4 @@ const Profiles = () => {
   );
 };
 
-export default Profiles;
+export default ProfilePage;

@@ -15,7 +15,9 @@ export const profiles = sqliteTable("profiles", {
   id: text("id").primaryKey(),
   profileTitle: text("profile_title").notNull(),
   profileContent: text("profile_content").notNull(),
-  timeCreated: integer("time_created", { mode: "timestamp" }).default(Date.now),
+  timeCreated: integer("time_created", { mode: "timestamp" }).default(
+    new Date(Date.now()),
+  ),
   timeUpdated: integer("time_updated", { mode: "timestamp" }).default(Date.now),
 });
 

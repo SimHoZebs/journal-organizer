@@ -1,6 +1,6 @@
 import MDEditor, { type PreviewType } from "@uiw/react-md-editor";
 import { useEffect, useState } from "react";
-import SideNav from "../components/SideNavNote";
+import SideNav from "../components/SideNav";
 
 //icons
 import closeSideNav from "../assets/icons/close-nav-icon.svg";

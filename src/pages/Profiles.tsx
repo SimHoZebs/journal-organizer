@@ -2,9 +2,9 @@ import { useState } from "react";
 import closeErrorDialog from "../assets/icons/Xmark.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import ghostIcon from "../assets/icons/ghost-icon.svg";
-import SideNav from "../components/SideNavProfile";
+import SideNav from "../components/SideNav";
 
-const Relationships = () => {
+const Profiles = () => {
   const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
   const [selectedRelationship, setSelectedRelationship] = useState<
     {
@@ -108,4 +108,4 @@ const Relationships = () => {
   );
 };
 
-export default Relationships;
+export default Profiles;

@@ -222,114 +222,113 @@ const Notes = () => {
           </span>
         </div>
 
-        {selectedNote ? (
-          <div
-            className={`px-8 ${
-              sideNavOpen ? "sm:px-10 sm:py-8" : "sm:px-14 sm:py-12"
-            } md:px-14 py-8 md:py-12 flex flex-col gap-5 max-w-4xl mx-auto h-full w-full`}
-          >
-            <input
-              type="text"
-              placeholder="Enter Title Here..."
-              className="text-4xl font-semibold font-montserrat text-neutral-50"
-              value={selectedNote.title || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSelectedNote((prev) =>
-                  prev ? { ...prev, title: e.target.value } : prev,
-                );
-              }}
-            />
+        {selectedNote
+          ? (
+            <div
+              className={`px-8 ${
+                sideNavOpen ? "sm:px-10 sm:py-8" : "sm:px-14 sm:py-12"
+              } md:px-14 py-8 md:py-12 flex flex-col gap-5 max-w-4xl mx-auto h-full w-full`}
+            >
+              <input
+                type="text"
+                placeholder="Enter Title Here..."
+                className="text-4xl font-semibold font-montserrat text-neutral-50"
+                value={selectedNote.title || ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSelectedNote((prev) =>
+                    prev ? { ...prev, title: e.target.value } : prev
+                  );
+                }}
+              />
 
-            <MDEditor
-              value={selectedNote.content || ""}
-              height="80%"
-              minHeight={300}
-              preview={previewMode}
-              onClick={() => {
-                setPreviewMode("edit");
-              }}
-              onChange={(value) => {
-                setSelectedNote((prev) =>
-                  prev ? { ...prev, content: value || "" } : prev,
-                );
-              }}
-              style={{
-                backgroundColor: "oklch(26.9% 0 0)",
-                color: "white",
-                borderRadius: "8px",
-              }}
-              previewOptions={{
-                style: {
+              <MDEditor
+                value={selectedNote.content || ""}
+                height="80%"
+                minHeight={300}
+                preview={previewMode}
+                onClick={() => {
+                  setPreviewMode("edit");
+                }}
+                onChange={(value) => {
+                  setSelectedNote((prev) =>
+                    prev ? { ...prev, content: value || "" } : prev
+                  );
+                }}
+                style={{
                   backgroundColor: "oklch(26.9% 0 0)",
                   color: "white",
-                },
-              }}
-            />
-            <div className="relative">
-              <div className="absolute top-4 right-4 flex gap-2">
-                <button
-                  type="button"
-                  className={`p-1 rounded-lg cursor-pointer ${
-                    !selectedNote.content || !selectedNote.title
-                      ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
-                      : "hover:bg-neutral-500"
-                  }`}
-                  onClick={async () => {
-                    const note =
-                      selectedNote.id === ""
+                  borderRadius: "8px",
+                }}
+                previewOptions={{
+                  style: {
+                    backgroundColor: "oklch(26.9% 0 0)",
+                    color: "white",
+                  },
+                }}
+              />
+              <div className="relative">
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button
+                    type="button"
+                    className={`p-1 rounded-lg cursor-pointer ${
+                      !selectedNote.content || !selectedNote.title
+                        ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
+                        : "hover:bg-neutral-500"
+                    }`}
+                    onClick={async () => {
+                      const note = selectedNote.id === ""
                         ? await createNote()
                         : await updateNote();
 
-                    setSelectedNote((prev) =>
-                      prev
-                        ? {
+                      setSelectedNote((prev) =>
+                        prev
+                          ? {
                             ...prev,
                             ...note,
                           }
-                        : prev,
-                    );
-                    setPreviewMode("preview");
-                    await refreshNavBar();
-                  }}
-                  disabled={
-                    selectedNote?.title === "" || selectedNote?.content === ""
-                  }
-                >
-                  <img
-                    src={SaveNoteIcon}
-                    alt="Save Icon"
-                    className="w-[40px] h-[35px] invert brightness-0"
-                  />
-                </button>
+                          : prev
+                      );
+                      setPreviewMode("preview");
+                      await refreshNavBar();
+                    }}
+                    disabled={selectedNote?.title === "" ||
+                      selectedNote?.content === ""}
+                  >
+                    <img
+                      src={SaveNoteIcon}
+                      alt="Save Icon"
+                      className="w-[40px] h-[35px] invert brightness-0"
+                    />
+                  </button>
 
-                <button
-                  type="button"
-                  className={`p-1 rounded-lg cursor-pointer ${
-                    !selectedNote.content || !selectedNote.title
-                      ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
-                      : "hover:bg-neutral-500"
-                  }`}
-                  onClick={async () => {
-                    await handleDelete();
-                    createNewNote();
-                    await refreshNavBar();
-                  }}
-                  disabled={
-                    selectedNote?.title === "" || selectedNote?.content === ""
-                  }
-                >
-                  <img
-                    src={DeleteNoteIcon}
-                    alt="Delete Icon"
-                    className="w-[35px] h-[35px] invert brightness-0"
-                  />
-                </button>
+                  <button
+                    type="button"
+                    className={`p-1 rounded-lg cursor-pointer ${
+                      !selectedNote.content || !selectedNote.title
+                        ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
+                        : "hover:bg-neutral-500"
+                    }`}
+                    onClick={async () => {
+                      await handleDelete();
+                      createNewNote();
+                      await refreshNavBar();
+                    }}
+                    disabled={selectedNote?.title === "" ||
+                      selectedNote?.content === ""}
+                  >
+                    <img
+                      src={DeleteNoteIcon}
+                      alt="Delete Icon"
+                      className="w-[35px] h-[35px] invert brightness-0"
+                    />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center" />
-        )}
+          )
+          : (
+            <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center" />
+          )}
       </div>
     </div>
   );

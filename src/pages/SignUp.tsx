@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import Navbar from "../components/Navbar";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -86,9 +85,7 @@ const SignUp = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col justify-center items-center bg-neutral-900">
-      <div className="w-full fixed top-0 left-0">
-        <Navbar />
-      </div>
+      <div className="w-full fixed top-0 left-0"></div>
 
       <div className="bg-neutral-700 w-96 p-6 rounded-xl shadow-md flex flex-col items-center">
         <h2 className="text-2xl font-bold text-neutral-100 mb-4">Sign Up</h2>

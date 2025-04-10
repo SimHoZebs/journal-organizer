@@ -4,7 +4,7 @@ import addNoteIcon from "../assets/icons/add-new-note-icon.svg";
 import closeSideNav from "../assets/icons/close-nav-icon.svg";
 import notesPage from "../assets/icons/notes-page-icon.svg";
 import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
-import searchNote from "../utils/searchNote"; // Function to search note entries
+import searchNote from "../utils/searchNote.ts"; // Function to search note entries
 
 type Props = {
   page: string; // Identifies the current page ("Notes" or "profile")

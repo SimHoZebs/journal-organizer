@@ -1,7 +1,7 @@
 const handleLogout = () => {
-  localStorage.removeItem("userId");
-  localStorage.removeItem("username");
-  localStorage.removeItem("token");
+	localStorage.removeItem("userId");
+	localStorage.removeItem("username");
+	localStorage.removeItem("token");
 };
 
 export default handleLogout;

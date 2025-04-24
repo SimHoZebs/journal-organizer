@@ -16,15 +16,17 @@ type ProfileItem = {
 const ProfilePage = () => {
   const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
   const [profilesList, setProfilesList] = useState<ProfileItem[]>([]);
-  const [selectedRelationship, setSelectedRelationship] = useState<ProfileItem | null>(null);
+  const [selectedRelationship, setSelectedRelationship] = useState<
+    ProfileItem | null
+  >(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Handle selecting a profile
   const handleSelectProfile = async (id: string) => {
     try {
       // Find the selected profile in the list or fetch it from API
-      const profile = profilesList.find(profile => profile.id === id);
-      
+      const profile = profilesList.find((profile) => profile.id === id);
+
       if (profile) {
         setSelectedRelationship(profile);
       } else {
@@ -36,7 +38,7 @@ const ProfilePage = () => {
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -64,14 +66,14 @@ const ProfilePage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
         const errorMessage = await response.json();
         throw new Error(
           errorMessage.error ||
-            "Unexpected error while searching for profiles"
+            "Unexpected error while searching for profiles",
         );
       }
 
@@ -82,7 +84,7 @@ const ProfilePage = () => {
       setErrorMessage(
         error instanceof Error
           ? `Failed to search profiles: ${error.message}`
-          : "An error occurred while searching profiles"
+          : "An error occurred while searching profiles",
       );
       console.error(error);
     }
@@ -94,14 +96,14 @@ const ProfilePage = () => {
       to: "/notes",
       icon: notesPage,
       altText: "Notes Page Icon",
-      isActive: false
+      isActive: false,
     },
     {
       to: "/relationships",
       icon: relationshipIcon,
       altText: "People Relationships Icon",
-      isActive: true
-    }
+      isActive: true,
+    },
   ];
 
   return (

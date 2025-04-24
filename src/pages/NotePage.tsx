@@ -8,8 +8,8 @@ import closeErrorDialog from "../assets/icons/Xmark.svg";
 import notesPage from "../assets/icons/notes-page-icon.svg";
 import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 import searchNote from "../utils/searchNote.ts";
-import Note from "../components/Note.tsx";
-
+import NoteComponent from "../components/Note.tsx";
+import { Note } from "../utils/notes.ts";
 
 const NotePage = () => {
   const [displayList, setDisplayList] = useState<Note[]>([]);
@@ -62,14 +62,14 @@ const NotePage = () => {
       to: "/notes",
       icon: notesPage,
       altText: "Notes Page Icon",
-      isActive: true
+      isActive: true,
     },
     {
       to: "/relationships",
       icon: relationshipIcon,
       altText: "People Relationships Icon",
-      isActive: false
-    }
+      isActive: false,
+    },
   ];
 
   //return the components created
@@ -96,6 +96,7 @@ const NotePage = () => {
         <div className="z-50 absolute bottom-4 right-4 bg-amber-700 px-5 py-2 rounded-lg flex items-center justify-between gap-4">
           <span className="text-neutral-50">{errorMessage}</span>
           <button
+            type="button"
             className="hover:bg-amber-500 rounded-md cursor-pointer p-1"
             onClick={() => setErrorMessage("")}
           >
@@ -136,7 +137,7 @@ const NotePage = () => {
 
         {selectedNote
           ? (
-            <Note
+            <NoteComponent
               previewMode={previewMode}
               createNote={createNewNote}
               sideNavOpen={sideNavOpen}

@@ -7,10 +7,8 @@ new Elysia()
   .use(cors())
   // Configure Elysia to accept raw binary data
   .get("/", () => ({ message: "STT API is running!" }))
-
   // Health check endpoint
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
-
   // Regular transcribe audio endpoint (non-streaming)
   .post("/api/transcribe", async ({ body, request }) => {
     console.log("POST /api/transcribe received");
@@ -74,8 +72,9 @@ new Elysia()
     } catch (error) {
       console.error("Error processing transcription request:", error);
       // Ensure we always return a valid JSON object
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : String(error);
       return {
         error: `Failed to transcribe audio: ${errorMessage}`,
         status: 500,

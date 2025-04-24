@@ -5,7 +5,6 @@ import closeSideNav from "../assets/icons/close-nav-icon.svg";
 // Generic item type that all displayed items must conform to
 type Item = {
   id: string;
-  [key: string]: unknown;
 };
 
 // Navigation link configuration
@@ -22,17 +21,17 @@ type Props<T extends Item> = {
   placeholder?: string;
   closeNav: React.Dispatch<React.SetStateAction<boolean>>;
   onItemSelect: (id: string) => void;
-  
+
   // Item display props
   items?: T[];
   setItems?: React.Dispatch<React.SetStateAction<T[]>>;
   getDisplayName: (item: T) => string;
-  
+
   // Optional actions
   createNewItem?: () => void;
   onSearch?: (query: string) => Promise<void>;
   setErrorMessage?: React.Dispatch<React.SetStateAction<string>>;
-  
+
   // Navigation
   navLinks: NavLink[];
   addButtonIcon?: string;
@@ -53,7 +52,7 @@ const SideNav = <T extends Item>(props: Props<T>) => {
   } = props;
 
   const [search, setSearch] = useState<string>("");
-  const [displayList, setDisplayList] = useState<T[]>(items);
+  const [displayList, setDisplayList] = useState<Item[]>(items);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const navModal = useRef<HTMLDivElement>(null);
 
@@ -68,7 +67,7 @@ const SideNav = <T extends Item>(props: Props<T>) => {
           props.setErrorMessage(
             error instanceof Error
               ? `Search failed: ${error.message}`
-              : "An error occurred while searching"
+              : "An error occurred while searching",
           );
         }
       }
@@ -86,7 +85,7 @@ const SideNav = <T extends Item>(props: Props<T>) => {
   const handleItemSelect = (id: string) => {
     setSelectedId(id);
     onItemSelect(id);
-    if (window.innerWidth < 640) {
+    if (globalThis.innerWidth < 640) {
       closeNav(false);
     }
   };
@@ -133,16 +132,14 @@ const SideNav = <T extends Item>(props: Props<T>) => {
                 />
               </button>
             )}
-            
+
             {/* Nav Links */}
             {navLinks.map((link, index) => (
               <Link key={index} to={link.to}>
                 <button
                   type="button"
                   className={`p-1.5 rounded-lg cursor-pointer ${
-                    link.isActive
-                      ? "bg-neutral-500"
-                      : "hover:bg-neutral-600"
+                    link.isActive ? "bg-neutral-500" : "hover:bg-neutral-600"
                   }`}
                 >
                   <img
@@ -159,9 +156,11 @@ const SideNav = <T extends Item>(props: Props<T>) => {
         {/* Search and Display List */}
         <div className="grow flex flex-col pt-4 pb-3.5 gap-3.5 overflow-hidden">
           {title && (
-            <h2 className="text-neutral-50 font-medium text-lg px-5">{title}</h2>
+            <h2 className="text-neutral-50 font-medium text-lg px-5">
+              {title}
+            </h2>
           )}
-          
+
           {/* Search Bar */}
           <input
             className="px-2.5 py-1 rounded-lg border-[0.5px] border-neutral-50 mx-5 text-neutral-50"

@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import SideNav from "../components/SideNav.tsx";
 
 //icons
-import notesPage from "../assets/icons/notes-page-icon.svg";
-import relationshipIcon from "../assets/icons/people-relationship-icon.svg";
 import searchNote from "../utils/searchNote.ts";
 import NoteComponent from "../components/Note.tsx";
 import type { Note } from "../utils/notes.ts";
@@ -13,11 +11,7 @@ const NotePage = () => {
   const [displayList, setDisplayList] = useState<Note[]>([]);
   const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
   const [previewMode, setPreviewMode] = useState<PreviewType>("preview");
-  const [selectedNote, setSelectedNote] = useState<Note>({
-    title: "",
-    content: "",
-    id: "",
-  });
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
   const createNewNote = () => {
     setSelectedNote({
@@ -37,22 +31,6 @@ const NotePage = () => {
     }
   };
 
-  // Navigation links for SideNav
-  const navLinks = [
-    {
-      to: "/notes",
-      icon: notesPage,
-      altText: "Notes Page Icon",
-      isActive: true,
-    },
-    {
-      to: "/relationships",
-      icon: relationshipIcon,
-      altText: "People Relationships Icon",
-      isActive: false,
-    },
-  ];
-
   const getselectedNote = (id: string) => {};
   const addNoteIcon = "";
 
@@ -69,7 +47,6 @@ const NotePage = () => {
           createNewItem={createNewNote}
           onItemSelect={getselectedNote}
           closeNav={setSideNavOpen}
-          navLinks={navLinks}
           addButtonIcon={addNoteIcon}
           getDisplayName={(item) => item.title}
         />

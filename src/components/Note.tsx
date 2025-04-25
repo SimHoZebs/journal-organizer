@@ -1,6 +1,4 @@
 import MDEditor, { type PreviewType } from "@uiw/react-md-editor";
-import DeleteNoteIcon from "../assets/icons/delete-note-icon.svg";
-import SaveNoteIcon from "../assets/icons/save-note-icon.svg";
 import searchNote from "../utils/searchNote.ts";
 import {
   createNote,
@@ -112,11 +110,7 @@ const Note = (props: Props) => {
               props.selectedNote?.content === ""
             }
           >
-            <img
-              src={SaveNoteIcon}
-              alt="Save Icon"
-              className="w-[40px] h-[35px] invert brightness-0"
-            />
+            <span className="icon-[mdi--content-save] h-4 w-4 bg-zinc-400 hover:bg-zinc-200" />
           </button>
 
           <button
@@ -132,11 +126,7 @@ const Note = (props: Props) => {
               props.selectedNote?.content === ""
             }
           >
-            <img
-              src={DeleteNoteIcon}
-              alt="Delete Icon"
-              className="w-[35px] h-[35px] invert brightness-0"
-            />
+            <span className="icon-[mdi--delete] h-4 w-4 bg-zinc-400 hover:bg-zinc-200" />
           </button>
         </div>
       </div>

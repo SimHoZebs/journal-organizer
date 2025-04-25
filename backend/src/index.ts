@@ -28,24 +28,8 @@ new Elysia()
     } else if (body instanceof ArrayBuffer) {
       console.log("Body is ArrayBuffer, converting to Buffer");
       audioBuffer = Buffer.from(new Uint8Array(body));
-    } else if (body === null || body === undefined) {
-      // Try to get raw body from request
-      console.log("Body is null/undefined, attempting to read raw request");
-      try {
-        // Read raw request body from Elysia's internal request object
-        const chunks: Buffer[] = [];
-        for await (const chunk of request.body as any) {
-          chunks.push(Buffer.from(chunk));
-        }
-        audioBuffer = Buffer.concat(chunks);
-        console.log(
-          "Read raw request data, size:",
-          audioBuffer.length,
-          "bytes",
-        );
-      } catch (e) {
-        console.error("Failed to read raw request:", e);
-      }
+    } else {
+      console.error("request body type is incorrect:", body);
     }
 
     try {

@@ -4,11 +4,3 @@
 @theme {
   --font-montserrat: "Montserrat Semibold", sans-serif;
 }
-
-@font-face {
-  font-display: swap;
-  font-family: "Montserrat Semibold";
-  font-style: normal;
-  font-weight: 600;
-  src: url("./assets/fonts/montserrat-v29-latin-600.woff2") format("woff2");
-}

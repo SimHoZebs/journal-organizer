@@ -1,22 +1,20 @@
-import MDEditor, { PreviewType } from "@uiw/react-md-editor";
+import MDEditor, { type PreviewType } from "@uiw/react-md-editor";
 import DeleteNoteIcon from "../assets/icons/delete-note-icon.svg";
 import SaveNoteIcon from "../assets/icons/save-note-icon.svg";
 import searchNote from "../utils/searchNote.ts";
 import {
   createNote,
   deleteNote,
-  type Note,
-  NoteListItem,
+  type Note as NoteType,
+  type NoteListItem,
   updateNote,
 } from "../utils/notes.ts";
-
-const Editor = MDEditor.default;
 
 interface Props {
   sideNavOpen: boolean;
   setSideNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedNote: Note;
-  setSelectedNote: React.Dispatch<React.SetStateAction<Note>>;
+  selectedNote: NoteType;
+  setSelectedNote: React.Dispatch<React.SetStateAction<NoteType>>;
   setDisplayList: React.Dispatch<React.SetStateAction<NoteListItem[]>>;
   previewMode: PreviewType;
   setPreviewMode: React.Dispatch<React.SetStateAction<PreviewType>>;
@@ -61,15 +59,11 @@ const Note = (props: Props) => {
   };
 
   return (
-    <div
-      className={`px-8 ${
-        props.sideNavOpen ? "sm:px-10 sm:py-8" : "sm:px-14 sm:py-12"
-      } md:px-14 py-8 md:py-12 flex flex-col gap-5 max-w-4xl mx-auto h-full w-full`}
-    >
+    <div className="flex flex-col gap-5 h-full w-full">
       <input
         type="text"
         placeholder="Enter Title Here..."
-        className="text-4xl font-semibold font-montserrat text-neutral-50"
+        className="text-4xl font-semibold text-zinc-100"
         value={props.selectedNote.title || ""}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           props.setSelectedNote((prev) =>
@@ -78,7 +72,7 @@ const Note = (props: Props) => {
         }}
       />
 
-      <Editor
+      <MDEditor
         value={props.selectedNote.content || ""}
         height="80%"
         minHeight={300}
@@ -109,8 +103,8 @@ const Note = (props: Props) => {
             type="button"
             className={`p-1 rounded-lg cursor-pointer ${
               !props.selectedNote.content || !props.selectedNote.title
-                ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
-                : "hover:bg-neutral-500"
+                ? "opacity-30 cursor-not-allowed bg-neutral-700 text-zinc-400"
+                : "hover:bg-zinc-500"
             }`}
             onClick={handleSave}
             disabled={
@@ -129,7 +123,7 @@ const Note = (props: Props) => {
             type="button"
             className={`p-1 rounded-lg cursor-pointer ${
               !props.selectedNote.content || !props.selectedNote.title
-                ? "opacity-30 cursor-not-allowed bg-neutral-700 text-neutral-400"
+                ? "opacity-30 cursor-not-allowed bg-zinc-700 text-zinc-400"
                 : "hover:bg-neutral-500"
             }`}
             onClick={handleDelete}

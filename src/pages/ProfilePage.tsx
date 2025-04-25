@@ -170,7 +170,7 @@ const ProfilePage = () => {
               sideNavOpen ? "sm:py-8" : "sm:py-12"
             } md:py-12 flex flex-col gap-5 max-w-4xl mx-auto w-full`}
           >
-            <h3 className="text-4xl font-semibold font-montserrat text-neutral-50">
+            <h3 className="text-4xl font-semibold text-neutral-50">
               {selectedRelationship.profileTitle}
             </h3>
             <div className="flex flex-col gap-1.5">
@@ -188,7 +188,7 @@ const ProfilePage = () => {
               src={ghostIcon}
               alt="Ghost Icon"
             />
-            <h3 className="font-semibold font-montserrat text-2xl text-neutral-50">
+            <h3 className="font-semibold text-2xl text-neutral-50">
               No Profile is Selected
             </h3>
           </div>

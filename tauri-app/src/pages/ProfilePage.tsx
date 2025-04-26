@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SideNav from "../components/SideNav.tsx";
-import { H3 } from "../comp/Heading";
+import SideNav from "../comp/SideNav";
+import { H3 } from "../comp/Heading.tsx";
 
 type ProfileItem = {
   id: string;

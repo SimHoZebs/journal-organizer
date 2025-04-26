@@ -1,5 +1,6 @@
 import MDEditor, { type PreviewType } from "@uiw/react-md-editor";
 import type { Dispatch, SetStateAction } from "react";
+import { Button, ActionBtn } from "./Button";
 
 // Define the FileSystemNote types again for clarity within this component
 // (Alternatively, import them from NotePage or a shared types file)
@@ -147,8 +148,7 @@ const Note = (props: Props) => {
       {/* Buttons Container */}
       <div className="flex justify-end gap-2 mt-4">
         {/* Edit/Preview Toggle Button */}
-        <button
-          type="button"
+        <Button
           onClick={() =>
             props.setPreviewMode(
               props.previewMode === "edit" ? "preview" : "edit",
@@ -157,12 +157,11 @@ const Note = (props: Props) => {
           className="px-3 py-1 rounded bg-zinc-600 hover:bg-zinc-500 text-white text-sm"
         >
           {props.previewMode === "edit" ? "Preview" : "Edit"}
-        </button>
+        </Button>
 
         {/* Save Button - Enabled only in edit mode */}
         {props.previewMode === "edit" && (
-          <button
-            type="button"
+          <Button
             className={`px-3 py-1 rounded text-sm text-white ${
               !props.selectedNote.content || !props.selectedNote.title // Basic validation
                 ? "bg-neutral-700 text-zinc-400 cursor-not-allowed"
@@ -173,19 +172,18 @@ const Note = (props: Props) => {
           >
             <span className="icon-[mdi--content-save] h-4 w-4 mr-1 align-middle" />
             Save
-          </button>
+          </Button>
         )}
 
         {/* Delete Button */}
-        <button
-          type="button"
-          className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
+        <ActionBtn
+          variant="negative"
+          className="px-3 py-1 text-white text-sm"
           onClick={handleDelete}
-          // disabled={!props.selectedNote.id} // Should always have an ID if selected
         >
           <span className="icon-[mdi--delete] h-4 w-4 mr-1 align-middle" />
           Delete
-        </button>
+        </ActionBtn>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import type { PreviewType } from "@uiw/react-md-editor";
 import { useState } from "react";
 import SideNav from "../components/SideNav.tsx";
-import NoteComponent from "../components/Note.tsx";
+import NoteComponent from "../comp/Note.tsx";
 import catchError from "../utils/catchError.ts";
+import { ActionBtn, SecondaryBtn } from "../comp/Button";
+import { H2 } from "../comp/Heading";
 
 interface FileSystemNoteItem {
   id: string;
@@ -129,31 +131,29 @@ const NotePage = () => {
           />
         ) : (
           <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center text-zinc-400">
-            <h2 className="text-2xl font-semibold text-zinc-200">
+            <H2 className="text-zinc-200">
               {directoryHandle ? "No file is open" : "No folder selected"}
-            </h2>
+            </H2>
             <p>
               {directoryHandle
                 ? "Select a note from the list or create a new one."
                 : "Click 'Load Notes Folder' to select a directory."}
             </p>
             {directoryHandle && ( // Only show create button if a directory is loaded
-              <button
-                type="button"
+              <SecondaryBtn
                 onClick={createNewNote}
                 className="text-purple-400 hover:underline mt-4"
               >
                 Create Note
-              </button>
+              </SecondaryBtn>
             )}
             {!directoryHandle && (
-              <button
-                type="button"
+              <ActionBtn
                 onClick={loadNotesFromDirectory}
-                className="mt-4 px-4 py-2 text-center text-sm bg-purple-600 hover:bg-purple-700 rounded text-white"
+                className="mt-4 px-4 py-2 text-center text-sm"
               >
                 Load Notes Folder
-              </button>
+              </ActionBtn>
             )}
           </div>
         )}

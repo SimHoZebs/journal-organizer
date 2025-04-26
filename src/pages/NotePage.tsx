@@ -1,70 +1,161 @@
 import type { PreviewType } from "@uiw/react-md-editor";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SideNav from "../components/SideNav.tsx";
-
-//icons
-import searchNote from "../utils/searchNote.ts";
 import NoteComponent from "../components/Note.tsx";
-import type { Note } from "../utils/notes.ts";
+import catchError from "../utils/catchError.ts";
+
+interface FileSystemNoteItem {
+  id: string;
+  name: string;
+  handle: FileSystemFileHandle;
+  lastModified?: Date;
+}
+
+interface FileSystemNote {
+  id: string;
+  title: string;
+  content: string;
+  handle: FileSystemFileHandle;
+  lastModified?: Date;
+}
 
 const NotePage = () => {
-  const [displayList, setDisplayList] = useState<Note[]>([]);
-  const [sideNavOpen, setSideNavOpen] = useState<boolean>(true);
+  const [displayList, setDisplayList] = useState<FileSystemNoteItem[]>([]);
   const [previewMode, setPreviewMode] = useState<PreviewType>("preview");
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [selectedNote, setSelectedNote] = useState<FileSystemNote | null>(null);
+  const [directoryHandle, setDirectoryHandle] =
+    useState<FileSystemDirectoryHandle | null>(null); // Store directory handle
 
-  const createNewNote = () => {
-    setSelectedNote({
-      title: "Untitled Note",
-      content: "",
-      id: "",
-    });
+  // Function to load notes from a selected directory
+  const loadNotesFromDirectory = async () => {
+    const [error, dirHandle] = await catchError(window.showDirectoryPicker());
+    if (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.log("User aborted the directory picker.");
+      } else {
+        console.error("Error loading notes from directory:", error);
+      }
+      return;
+    }
+    setDirectoryHandle(dirHandle);
+    const notes: FileSystemNoteItem[] = [];
+
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === "file" && entry.name.endsWith(".md")) {
+        const file = await entry.getFile();
+        notes.push({
+          id: file.name,
+          name: file.name,
+          handle: entry,
+          lastModified: new Date(file.lastModified),
+        });
+      }
+    }
+    setDisplayList(notes);
+    setSelectedNote(null); // Clear selected note when loading new directory
   };
 
-  // Handle search functionality
-  const handleSearch = async (query: string) => {
+  const createNewNote = async () => {
+    if (!directoryHandle) {
+      alert("Please select a directory first using the 'Load Notes' button.");
+      return;
+    }
     try {
-      const results = await searchNote(query);
-      setDisplayList(results || []);
+      const fileName = prompt("Enter a name for the new note (e.g., my-note):");
+      if (!fileName) return; // User cancelled
+
+      const fileHandle = await directoryHandle.getFileHandle(`${fileName}.md`, {
+        create: true,
+      });
+      const newNoteItem: FileSystemNoteItem = {
+        id: `${fileName}.md`,
+        name: `${fileName}.md`,
+        handle: fileHandle,
+      };
+      const newNote: FileSystemNote = {
+        id: newNoteItem.id,
+        title: newNoteItem.name,
+        content: "",
+        handle: newNoteItem.handle,
+      };
+
+      setDisplayList((prevList) => [...prevList, newNoteItem]);
+      setSelectedNote(newNote);
+      setPreviewMode("edit"); // Go to edit mode for the new note
     } catch (error) {
-      console.error("Error searching notes:", error);
+      console.error("Error creating new note:", error);
+      alert(`Failed to create note: ${error}`);
     }
   };
 
-  const getselectedNote = (id: string) => {};
-  const addNoteIcon = "";
+  // Handle selecting a note from the list
+  const handleSelectNote = async (item: FileSystemNoteItem) => {
+    try {
+      const file = await item.handle.getFile();
+      const content = await file.text();
+      setSelectedNote({
+        id: item.id, // Add id
+        title: item.name,
+        content: content,
+        handle: item.handle, // Pass the handle
+      });
+      setPreviewMode("preview"); // Reset to preview mode when selecting a note
+    } catch (error) {
+      console.error("Error reading note file:", error);
+    }
+  };
 
-  //return the components created
   return (
     <div className="flex h-dvh bg-zinc-900">
-      {sideNavOpen && (
-        <SideNav<Note>
-          title="Notes"
-          placeholder="Search Note"
-          items={displayList}
-          setItems={setDisplayList}
-          onSearch={handleSearch}
-          createNewItem={createNewNote}
-          onItemSelect={getselectedNote}
-          closeNav={setSideNavOpen}
-          addButtonIcon={addNoteIcon}
-          getDisplayName={(item) => item.title}
-        />
-      )}
+      <SideNav<FileSystemNoteItem>
+        title="Notes"
+        placeholder="Notes from Folder" // Updated placeholder
+        items={displayList}
+        setItems={setDisplayList} // Keep for potential reordering/deletion later
+        createNewItem={createNewNote}
+        onItemSelect={handleSelectNote} // Use the implemented handler
+        getDisplayName={(item) => item.name} // Display file name
+      />
 
       <div className="flex flex-col w-full h-full p-8">
         {selectedNote ? (
           <NoteComponent
             previewMode={previewMode}
-            createNote={createNewNote}
-            sideNavOpen={sideNavOpen}
             setSelectedNote={setSelectedNote}
             setPreviewMode={setPreviewMode}
-            selectedNote={selectedNote}
-            setDisplayList={setDisplayList}
+            selectedNote={selectedNote} // Pass the FileSystemNote object
+            setDisplayList={setDisplayList} // Remove incorrect cast
+            directoryHandle={directoryHandle} // Pass directory handle for saving
           />
         ) : (
-          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center" />
+          <div className="h-full p-8 flex flex-col justify-center items-center gap-5 text-center text-zinc-400">
+            <h2 className="text-2xl font-semibold text-zinc-200">
+              {directoryHandle ? "No file is open" : "No folder selected"}
+            </h2>
+            <p>
+              {directoryHandle
+                ? "Select a note from the list or create a new one."
+                : "Click 'Load Notes Folder' to select a directory."}
+            </p>
+            {directoryHandle && ( // Only show create button if a directory is loaded
+              <button
+                type="button"
+                onClick={createNewNote}
+                className="text-purple-400 hover:underline mt-4"
+              >
+                Create Note
+              </button>
+            )}
+            {!directoryHandle && (
+              <button
+                type="button"
+                onClick={loadNotesFromDirectory}
+                className="mt-4 px-4 py-2 text-center text-sm bg-purple-600 hover:bg-purple-700 rounded text-white"
+              >
+                Load Notes Folder
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

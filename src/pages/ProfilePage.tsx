@@ -15,17 +15,17 @@ const ProfilePage = () => {
     useState<ProfileItem | null>(null);
 
   // Handle selecting a profile
-  const handleSelectProfile = async (id: string) => {
+  const handleSelectProfile = async (item: ProfileItem) => {
     try {
       // Find the selected profile in the list or fetch it from API
-      const profile = profilesList.find((profile) => profile.id === id);
+      const profile = profilesList.find((profile) => profile.id === item.id);
 
       if (profile) {
         setSelectedRelationship(profile);
       } else {
         // If not found in the list, fetch it from the API
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/profile/${id}`,
+          `${import.meta.env.VITE_API_URL}/api/profile/${item.id}`,
           {
             method: "GET",
             headers: {
@@ -84,9 +84,7 @@ const ProfilePage = () => {
           placeholder="Search Profile"
           items={profilesList}
           setItems={setProfilesList}
-          onSearch={handleSearch}
           onItemSelect={handleSelectProfile}
-          closeNav={setSideNavOpen}
           getDisplayName={(item) => item.profileTitle}
         />
       )}

@@ -5,6 +5,7 @@ import NoteComponent from "../comp/Note.tsx";
 import catchError from "../utils/catchError.ts";
 import { ActionBtn, SecondaryBtn } from "../comp/Button.tsx";
 import { H2 } from "../comp/Heading.tsx";
+import { invoke } from "@tauri-apps/api/core";
 
 interface FileSystemNoteItem {
   id: string;
